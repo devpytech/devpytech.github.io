@@ -281,6 +281,10 @@ input[name="website"] {
     display: none;
 }
 
+#isso-root {
+    width: 100%;
+}
+
 .input-wrapper > input, .post-action > input {
     font-family: 'Source Sans Pro',sans-serif !important;
 }

@@ -1,0 +1,1552 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0" xmlns:media="http://search.yahoo.com/mrss/"><channel><title><![CDATA[DevPy]]></title><description><![CDATA[The best software recommendations, linux tweaks, and custom code before it's cool.]]></description><link>https://www.devpy.me/</link><image><url>https://www.devpy.me/favicon.png</url><title>DevPy</title><link>https://www.devpy.me/</link></image><generator>Ghost 3.13</generator><lastBuildDate>Thu, 09 Apr 2020 05:28:06 GMT</lastBuildDate><atom:link href="https://www.devpy.me/rss/" rel="self" type="application/rss+xml"/><ttl>60</ttl><item><title><![CDATA[How to use Nvidia-Xrun to unlock your Nvidia laptop's full potential on linux]]></title><description><![CDATA[<!--kg-card-begin: markdown--><p>Optimus laptops are considered a major pain to use on linux, with many different ways to use them. You can opt to use the nvidia proprietary drivers and disable your internal graphics and forgo all hopes of battery life, or disable your graphics card entirely and use integrated graphics. Or,</p>]]></description><link>https://www.devpy.me/nvidia-xrun/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa51</guid><category><![CDATA[desktop environments]]></category><category><![CDATA[distributions]]></category><category><![CDATA[open source news]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Thu, 18 Jul 2019 01:36:00 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2019/07/nvidia-xrun2.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2019/07/nvidia-xrun2.png" alt="How to use Nvidia-Xrun to unlock your Nvidia laptop's full potential on linux"><p>Optimus laptops are considered a major pain to use on linux, with many different ways to use them. You can opt to use the nvidia proprietary drivers and disable your internal graphics and forgo all hopes of battery life, or disable your graphics card entirely and use integrated graphics. Or, you can use bumblebee, a popular effort to enable powersaving while still using your dedicated GPU, but the project is a mixed bag of bad compatibility, much worse performance than just the nvidia drivers, and zero support for vulkan and no plans to implement it.</p>
+<p>But, fear not, nvidia-xrun is here to save you! It's a open source script that can toggle your dedicated GPU on and off for full powersaving. Nvidia-xrun provides the same compatibility as the proprietary drivers, full performance, full vulkan support all at the cost of a little convenience (as far as I can tell, you need to run the nvidia gpu in a separate desktop environment).</p>
+<h2 id="fornewbies">For newbies</h2>
+<p>Skip to the next section if you understood the introduction.</p>
+<p>Basically, the goal of this project is to allow games and other applications that can make use of a graphics card run at full speed, the way that they do automatically on Windows. Here are a few definitions:</p>
+<style type="text/css">
+.tg  {border-collapse:collapse;border-spacing:0;}
+.tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;border-color:black;}
+.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
+</style>
+<table class="tg">
+  <tr>
+    <th class="tg-0pky"><b>phrase</b></th>
+    <th class="tg-0pky"><b>definition</b></th>
+  </tr>
+  <tr>
+    <td class="tg-0pky">dedicated graphics card, dedicated GPU, nvidia GPU</td>
+    <td class="tg-0pky">this is the high performance card in your laptop</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">integrated GPU, intel graphics</td>
+    <td class="tg-0pky">the graphics card built into your laptops CPU</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">nvidia-xrun<br></td>
+    <td class="tg-0pky">a script that allows the high performance GPU to run applications in linux</td>
+  </tr>
+  <tr>
+    <td class="tg-0pky">nvidia drivers</td>
+    <td class="tg-0pky">the proprietary, not open source, not free as in free beer drivers<br></td>
+  </tr>
+</table>
+<p>I'll be adding to this section as I get questions so please ask if you have one. The comment section is at the bottom of the page.</p>
+<h2 id="howtotellifthisguideisforyou">How to tell if this guide is for you</h2>
+<p>On Windows, open Device Manager and open the display adapters section:</p>
+<p><img src="https://www.devpy.me/content/images/2019/07/nvidia-optimus.png" alt="How to use Nvidia-Xrun to unlock your Nvidia laptop's full potential on linux"></p>
+<p>Image from <a href="https://nvidia.custhelp.com/app/answers/detail/a_id/2523/~/how-can-i-tell-if-an-application-is-being-rendered-on-the-integrated-graphics">the nvidia website.</a> Make sure your system is similar if you plan to follow this tutorial once you install linux <a href="https://www.devpy.me/how-to-dual-boot-windows-10-with-ubuntu/">(or on your dual booted system).</a></p>
+<hr>
+<p>On linux, run this command:</p>
+<pre><code class="language-bash">lspci | grep 'VGA|3D'
+</code></pre>
+<p>and make sure the output is similar to the following:</p>
+<pre><code>XX:XX.X VGA/3D compatible controller: Intel Corporation Graphics
+XX:XX.X VGA/3D compatible controller: NVIDIA Corporation Device
+</code></pre>
+<p>If the nvidia card is not showing you might not have a driver loaded for it (such as nouveau, the open source driver for nvidia cards).</p>
+<h2 id="installingwhatyouneed">Installing what you need</h2>
+<p>This guide is centered on Arch linux, and <em>I will not be providing support on this page</em>. If something is broken or if it is not working, post on your distribution forums, on the nvidia-xrun github page, or linux communities on reddit that can all provide much better support. That said if there is something wrong with this guide or if you have a general question please comment. Nvidia xrun is the easiest way to use a nvidia card on a laptop in my experience and your installation should go smoothly, fingers crossed.</p>
+<p><strong>On Arch</strong></p>
+<p>Install proprietary drivers:</p>
+<pre><code class="language-bash">sudo pacman -S nvidia
+</code></pre>
+<p>Install nvidia-xrun-git from the aur (edit with your aur helper):</p>
+<pre><code class="language-bash">yay nvidia-xrun-git
+</code></pre>
+<p>Or (if you dont have an aur helper):</p>
+<pre><code class="language-bash">git clone https://aur.archlinux.org/nvidia-xrun-git.git
+cd nvidia-xrun-git
+makepkg -si
+</code></pre>
+<p><strong>On other distributions</strong></p>
+<p>Install the nvidia drivers from your package manager (or from the nvidia website).</p>
+<p>It's pretty unlikely that nvidia-xrun is in your distribution package manager but check anyway first.</p>
+<pre><code class="language-bash">git clone https://github.com/Witko/nvidia-xrun.git
+cd nvidia-xrun
+</code></pre>
+<p>This is the structure of the script (edited from the git repo)</p>
+<ul>
+<li><strong>/usr/bin/nvidia-xrun</strong> - the executable script</li>
+<li><strong>/etc/X11/nvidia-xorg.conf</strong> - the main X conf file</li>
+<li><strong>/etc/X11/xinit/nvidia-xinitrc</strong> - xinitrc config file. Contains the setting of provider output source</li>
+<li><strong>/etc/X11/xinit/nvidia-xinitrc.d</strong> - custom xinitrc scripts directory</li>
+<li><strong>/etc/X11/nvidia-xorg.conf.d</strong> - custom X config directory</li>
+<li><strong>/etc/systemd/system/nvidia-xrun-pm.service</strong> systemd service</li>
+<li><strong>/etc/default/nvidia-xrun</strong> - nvidia-xrun config file</li>
+</ul>
+<p>Optional (we will cover openbox later, I've found the xsession file unnecessary but if you would like, you can try to use it):</p>
+<ul>
+<li><strong>/usr/share/xsessions/nvidia-xrun-openbox.desktop</strong> - xsession file for openbox</li>
+<li><strong>/usr/share/xsessions/nvidia-xrun-plasma.desktop</strong> - xsession file for plasma</li>
+<li><strong>~/.nvidia-xinitrc</strong> - user-level custom xinit script file</li>
+</ul>
+<p>Use something similar to the following to set up the script (this may vary depending on distro! Especially the service portion or the X11 path). <strong>Don't blindly paste this in! Look into your distro first and modify the paths.</strong></p>
+<pre><code class="language-bash"># inside the nvidia-xrun folder
+sudo cp nvidia-xrun /usr/bin/nvidia-xrun
+sudo cp nvidia-xorg.conf /etc/X11/nvidia-xorg.conf
+sudo cp nvidia-xinitrc /etc/X11/xinit/nvidia-xinitrc
+sudo cp nvidia-xrun-pm.service /etc/systemd/system/nvidia-xrun-pm.service
+
+# enable the service
+sudo systemctl enable nvidia-xrun-pm
+
+# config directories
+sudo mkdir /etc/X11/xinit/nvidia-xinitrc.d/
+sudo mkdir /etc/X11/nvidia-xorg.conf.d/
+</code></pre>
+<h2 id="setbusid">Set bus ID</h2>
+<p>If you got nvidia-xrun from the AUR it's been done automatically. Skip this.</p>
+<pre><code class="language-bash">lspci | grep -i nvidia | awk '{print $1}'
+</code></pre>
+<p>You should get <strong>01:00.0</strong> or something similar. Now make a file in your xorg config directory.</p>
+<pre><code># /etc/X11/nvidia-xorg.conf.d/30-nvidia.conf
+
+Section &quot;Device&quot;
+    Identifier &quot;nvidia&quot;
+    Driver &quot;nvidia&quot;
+    BusID &quot;PCI:1:0:0&quot;
+EndSection
+
+# uncomment if you get issues
+
+Section &quot;Screen&quot;
+    Identifier &quot;nvidia&quot;
+    Device &quot;nvidia&quot;
+    #  Option &quot;AllowEmptyInitialConfiguration&quot; &quot;Yes&quot;
+    #  Option &quot;UseDisplayDevice&quot; &quot;none&quot;
+EndSection
+</code></pre>
+<p>Now reboot and add a desktop.</p>
+<h2 id="openboxandusingnvidiaxrun">Openbox and using nvidia-xrun</h2>
+<p>This is the desktop you will run your games and nvidia applications in. This is required to make apps like steam work but you can try running <code>nvidia-xrun *executable*</code> instead.</p>
+<p>Install openbox on arch:</p>
+<pre><code class="language-bash">sudo pacman -S openbox
+</code></pre>
+<p><a target="_blank" href="https://www.devpy.me/your-guide-to-a-comfortable-linux-desktop-with-openbox/"><img src="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-12-41-07.png" alt="How to use Nvidia-Xrun to unlock your Nvidia laptop's full potential on linux"></a></p>
+<p><a href="https://www.devpy.me/your-guide-to-a-comfortable-linux-desktop-with-openbox/">Follow this guide to make it pretty</a></p>
+<p>I reccomend something lightweight so that you can run two desktop environements (intel and nvidia) at once but feel free to use any desktop you want.</p>
+<p>Add this so that it launches when you run <code>nvidia-xrun</code></p>
+<p>The file .nvidia-xinitrc:</p>
+<pre><code class="language-bash"># ~/.nvidia-xinitrc
+if [ $# -gt 0 ]; then
+	$*
+else
+	openbox-session
+fi
+</code></pre>
+<p><strong>Now you are good to go!</strong> If you haven't already, reboot. Then run <code>nvidia-xrun</code> in a new terminal session <em>(not in a running DE! The shortcut for most systems is CTRL + ALT + F# where F# is 0-9. You may need to add FN)</em> and see if openbox opens!</p>
+<hr>
+<p>This is a simple command to check which GPU you are using:</p>
+<pre><code class="language-bash">glxinfo|egrep &quot;OpenGL vendor|OpenGL renderer*&quot;
+</code></pre>
+<p>With intel, I get the following:</p>
+<pre><code>[robert@rawlinux ~]$ ./gpu.sh 
+OpenGL vendor string: Intel Open Source Technology Center
+OpenGL renderer string: Mesa DRI Intel(R) HD Graphics 630 (Kaby Lake GT2) 
+</code></pre>
+<p>And with nvidia</p>
+<pre><code>[robert@rawlinux ~]$ ./gpu.sh
+OpenGL vendor string: NVIDIA Corporation
+OpenGL renderer string: GeForce 1050/PCIe/SSE2
+</code></pre>
+<p>Now time to benchmark it! ;)</p>
+<p><img src="https://www.devpy.me/content/images/2019/07/nvidia-xrun.png" alt="How to use Nvidia-Xrun to unlock your Nvidia laptop's full potential on linux"></p>
+<h2 id="credits">Credits</h2>
+<p>This article was adapted from the arch wiki. <a href="https://wiki.archlinux.org/index.php/Nvidia-xrun">Here is the article</a></p>
+<p>However it seems to be outdated as it is reccomending bbswitch and following it broke my xorg install on my laptop (as of writing this article). I'm suggesting changes there. I've also tried to make the process easier to follow. Again, if you have any questions comment down below.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Actionable Linux Security and Device Protection]]></title><description><![CDATA[Linux is generally more robust than Windows and less vulnerable when it comes to web attacks. However, that doesn’t mean that it is entirely secure.]]></description><link>https://www.devpy.me/actionable-linux-security-and-device-protection/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa4f</guid><category><![CDATA[security]]></category><dc:creator><![CDATA[Scott H.]]></dc:creator><pubDate>Fri, 28 Dec 2018 18:12:14 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2018/12/Quick-Guide-to-Linux-Security.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><blockquote>
+<img src="https://www.devpy.me/content/images/2018/12/Quick-Guide-to-Linux-Security.png" alt="Actionable Linux Security and Device Protection"><p>This article is from guest author <a href="https://www.devpy.me/author/scott/">Scott H.</a></p>
+</blockquote>
+<p>Linux is generally more robust than Windows and less vulnerable when it comes to different types of attacks. However, that doesn’t mean that it is entirely secure and impenetrable. Just like any other operating system, Linux requires proper maintenance and protection against potential cyber criminals.</p>
+<p>Protecting a Linux device from potential attacks and malware when it’s connected to the internet is very easy to do. There are many ways for protection available out there, but there are several which are great to start with.</p>
+<p>Here are the simplest and most actionable ways Linux users can protect their devices and ensure they are as secure as possible.</p>
+<h1 id="updatingthesystemonaregularbasis">Updating the System on a Regular Basis</h1>
+<p>Keeping up with security updates is one of the best ways to protect a Linux device. This is because new vulnerabilities keep popping up, and new security patches provide protection against those vulnerabilities.</p>
+<p>However, not all system updates offer the best protection. This happens when developers don’t thoroughly test them before releasing into the software repository. That way, some defects do find their way through, so installing the latest system updates may cause serious issues. This is why the smartest thing to do is to install only the most important updates, by staying on stable options or only upgrading with major revisions.</p>
+<p>For instance, updates that can fix specific bugs and package problems are best to install first. If there’s an update regarding the user interface, it’s best to wait until developers thoroughly test it. Once they prove it’s completely secure, you can safely update your package.</p>
+<h1 id="installingantivirussoftware">Installing Antivirus Software</h1>
+<p><img src="https://www.devpy.me/content/images/2018/12/Copy-of-Quick-Guide-to-Linux-Security.png" alt="Actionable Linux Security and Device Protection"></p>
+<p>Although Linux devices encounter considerably fewer viruses than their Windows counterparts, they are not immune to them. If a Linux user connects their device to the internet, they leave the door open for many potential viruses.</p>
+<p>To prevent viruses from crawling into the system, every Linux user should have proper antivirus software. Many users think that installing one on Linux doesn’t make sense, because there aren’t many Linux viruses. However, although Linux attacks are rare, there are some <a href="https://www.computerworlduk.com/galleries/security/10-linux-malware-threats-bots-backdoors-trojans-malicious-apps-3634006/">Linux malware threats</a> to be aware of.</p>
+<p>That’s where antivirus software comes into play, so having some comes in handy.</p>
+<h1 id="restrictingrootaccess">Restricting Root Access</h1>
+<p>Logging into the Linux system as a root user attracts potential viruses and malicious software. With root-level access, many pieces of software that look legitimate but are not can find their way through to the system. This is because antivirus software cannot detect them once they have root permissions.</p>
+<p>Such rootkits can infect the Linux system and compromise any file, making it impossible to identify where they came from. That’s why Linux users should leave the root account only for the most necessary maintenance operations.</p>
+<h1 id="avoidingdualbootingwithwindows">Avoiding Dual-Booting with Windows</h1>
+<p><img src="https://www.devpy.me/content/images/2016/06/ubuntudualboot.png" alt="Actionable Linux Security and Device Protection"></p>
+<p><a href="https://www.makeuseof.com/tag/risks-dual-booting-windows-linux-operating-systems/">Dual-booting Linux with Windows</a> enables potential hackers to access the Linux system. Windows is more vulnerable to cyber-attacks, so running it together with Linux puts Linux at great risk.</p>
+<p>With dual-booting with Windows, cyber criminals can gain access to the Windows partition. Once they do, they can find their way through data and accounts, which can compromise the entire Linux device. Therefore, avoiding dual-booting keeps Linux much more secure.</p>
+<h1 id="disablingunnecessaryservices">Disabling Unnecessary Services</h1>
+<p>At startup, a Linux distro automatically starts running many services that can be of use to users. However, many of them are unnecessary, such as Bluetooth on a device without a Bluetooth adapter.</p>
+<p>One of the services that could potentially open the door to hackers is SSH or Secure Shell. It’s a protocol for a remote system login, which is unnecessary if a user never logs remotely onto their system. To avoid potential web attacks and add a protective layer to a Linux device, users should disable all such services.</p>
+<h1 id="usingavpn">Using a VPN</h1>
+<p><img src="https://www.devpy.me/content/images/2018/12/markus-spiske-793546-unsplash.jpg" alt="Actionable Linux Security and Device Protection"></p>
+<p>Using a VPN is the best way to protect a Linux device because it encrypts all data. What is VPN? A VPN (Virtual Private Network) is a network that encrypts web traffic and hides internet activity even from an ISP (Internet Service Provider).</p>
+<p>With a VPN, users can block hackers and stay anonymous when they connect their Linux devices to the internet. As all data coming to and from servers is encrypted, <a href="https://nordvpn.com/what-is-a-vpn/">VPNs make it impossible</a> for hackers to gain system access.</p>
+<p>If you want to protect your Linux device and all your data, make sure you follow the tips mentioned above. There are many more ways to do it, but these are the most actionable ones. They are very easy to apply, and they will take your Linux device to a whole new level of security.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[How to emulate Wii U games on Linux - installing and optimising Cemu]]></title><description><![CDATA[<!--kg-card-begin: markdown--><p>Cemu, a Wii U emulator released two years ago, has been making waves for the level of performance emulating it's achieved in the [relatively] short time it's been in development. Unfortunately, Cemu uses opengl as it's graphics engine which lowers AMD GPU performance considerably, due to poor AMD opengl support.</p>]]></description><link>https://www.devpy.me/how-to-emulate-breath-of-the-wild-on-linux-or-installing-and-optimising-cemu/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa4c</guid><category><![CDATA[wine]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Sat, 25 Aug 2018 01:22:49 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2018/08/ubuntudualboot.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2018/08/ubuntudualboot.png" alt="How to emulate Wii U games on Linux - installing and optimising Cemu"><p>Cemu, a Wii U emulator released two years ago, has been making waves for the level of performance emulating it's achieved in the [relatively] short time it's been in development. Unfortunately, Cemu uses opengl as it's graphics engine which lowers AMD GPU performance considerably, due to poor AMD opengl support. (Short explanation of why: AMD is focusing on Vulkan and ignoring opengl, compared to Nvidia which still has a large corporate market that needs opengl support, and has optimized their drivers for it extensively).</p>
+<p>An easy way to get around AMD driver problems is too... get another driver. Mesa, developed open source by the community, recently implemented all of the opengl extensions Cemu uses, so you can now run Cemu under Mesa without any forks or custom compiles. (Previously, users had to use mesa mild, a buggy fork). The guide below details installing the best version of wine for the job, installing Cemu, game management under Linux, and lots of performance optimization for both Mesa and Cemu.</p>
+<p><img src="https://www.devpy.me/content/images/2018/08/ezgif.com-video-to-gif.gif" alt="How to emulate Wii U games on Linux - installing and optimising Cemu"></p>
+<h1 id="installingwine">Installing Wine</h1>
+<p>I've found that Cemu crashes with Wine development version, so I would recommend sticking to stable.</p>
+<h2 id="ubuntu">Ubuntu</h2>
+<pre><code class="language-bash">sudo dpkg --add-architecture i386
+wget -nc https://dl.winehq.org/wine-builds/Release.key
+sudo apt-key add Release.key
+sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/
+sudo apt-get update
+sudo apt-get install --install-recommends winehq-stable
+</code></pre>
+<h2 id="fedora">Fedora</h2>
+<p>Replace &quot;version&quot; with your Fedora version, e.g. 28</p>
+<pre><code class="language-bash">dnf config-manager --add-repo https://dl.winehq.org/wine-builds/fedora/VERSION/winehq.repo
+dnf install winehq-stable
+</code></pre>
+<p>For other distros, wine wiki might have a page on how to install.</p>
+<h2 id="winesettings">Wine Settings</h2>
+<p>Run</p>
+<pre><code class="language-bash">winecfg
+</code></pre>
+<p>and set the Windows version to 10, and add</p>
+<pre><code class="language-text">dbghelp.dll
+</code></pre>
+<p>in the Libraries tab.</p>
+<p>Install <code>winetricks</code>:</p>
+<pre><code class="language-bash">sudo apt install winetricks
+</code></pre>
+<p>Then run</p>
+<pre><code class="language-bash">bash winetricks vcrun2015
+</code></pre>
+<p>To install the Microsoft Visual C++ 2015 Redistributable. (You can try vcrun2017 as well).</p>
+<h1 id="drivers">Drivers</h1>
+<p>For nvidia, install the drivers through your distro's package manager. Most have it as nvidia-<em>version</em>.</p>
+<p>For AMD, it's a bit more complicated. You can either use the proprietary drivers, which can be found <a href="https://support.amd.com/en-us/kb-articles/Pages/Radeon-Software-for-Linux-Release-Notes.aspx">here</a>, or you can try just using mesa. On Ubuntu, this is the following:</p>
+<pre><code class="language-bash">sudo add-apt-repository ppa:oibaf/graphics-drivers
+sudo apt update &amp;&amp; sudo apt dist-upgrade
+</code></pre>
+<p>On Arch, the latest mesa is in the AUR. I would recommend trying mesa before proprietary, as the opengl performance is higher.</p>
+<h1 id="cemu">Cemu</h1>
+<p><img src="https://www.devpy.me/content/images/2018/08/Screenshot-from-2018-08-24-21-24-17.png" alt="How to emulate Wii U games on Linux - installing and optimising Cemu"></p>
+<p>Now we get to the good part. Cemu can be <a href="http://cemu.info/">downloaded from here</a>. As of this article, it's 1.13, with 1.14 a WIP that didn't work for me. I'm writing the rest of the article assuming that you extract the download to <code>/home/username/cemu/</code>.</p>
+<h2 id="cemuhook">Cemuhook</h2>
+<p>You can download cemuhook, a debug helper that adds more options, <a href="https://cemuhook.sshnuke.net/">from here</a>. Extract the files to the same folder as Cemu.</p>
+<p>Then, run <code>winecfg</code> in the terminal. Add &quot;dbghelp.dll&quot; in the libraries section.</p>
+<p><img src="https://www.devpy.me/content/images/2018/11/dbghelpdll.png" alt="How to emulate Wii U games on Linux - installing and optimising Cemu"></p>
+<h2 id="graphicspacks">Graphics packs</h2>
+<p>These change the look of games, and can improve performance. You'll need these to play above 30fps.</p>
+<p>Download them from <a href="https://slashiee.github.io/cemu_graphic_packs/">here</a> and extract them to <code>~/cemu/graphicPacks/</code></p>
+<h2 id="performance">Performance</h2>
+<p>Open Cemu:</p>
+<pre><code class="language-bash">cd ~/cemu
+vblank_mode=0 mesa_glthread=true wine Cemu.exe
+</code></pre>
+<ul>
+<li>Options --&gt; GPU buffer cache accuracy = low</li>
+<li>CPU --&gt; Mode = Dual core recompiler (if your CPU has 6+ cores, choose triple core)</li>
+<li>Debug --&gt; MM timer accuracy = 1ms</li>
+<li>Debug --&gt; Custom timer = QPC</li>
+</ul>
+<p>Add all graphics packs for the games you plan on playing / installing. Breath of the Wild, for example:</p>
+<ul>
+<li>BOTW AMD Shadows</li>
+<li>BOTW AMD Light circle fix</li>
+<li>BOTW 1080p</li>
+<li>BOTW High res shadows</li>
+<li>BOTW No depth of field</li>
+<li>BOTW FPS++</li>
+</ul>
+<h1 id="games">Games</h1>
+<p>To install some games for cemu, you need a wii u game manager. I'll give a short tutorial on a very random script collection titled &quot;wiiu-things&quot; by github user ihaveamac which seems to be the only software that works on Linux.</p>
+<p>Ensure Python is installed.</p>
+<p>Clone wiiu-things from Github:</p>
+<pre><code class="language-bash">git clone https://github.com/devpytech/wiiu-things.git
+cd wiiu-things
+</code></pre>
+<p>Now it's time to download a game. Please buy the game before you download.</p>
+<h2 id="findgamekeys">Find game keys</h2>
+<blockquote>
+<p><b style="color:red">Please support developers by buying the game before you emulate it. DevPy does not support piracy.</b></p>
+</blockquote>
+<p>Open the <a href="http://wiiubrew.org/wiki/Title_database">Wii U Title ID database</a></p>
+<p>Use <code>ctrl+f</code> to find the game you want to emulate, such as &quot;Breath of The Wild&quot; or &quot;Super Mario 3d World&quot; and find the titleid under the right region (USA, EUR, or JAP). Copy the titleid and place it in a text file. (Make sure to remove the dashes in the titlekey!)</p>
+<p>Do this for all two or three listings in a region; these are the DLC, update, and main game. There's some more info at the beginning of the wiki page.</p>
+<h2 id="download">Download</h2>
+<p><img src="https://www.devpy.me/content/images/2018/08/Screenshot-from-2018-08-24-21-22-16.png" alt="How to emulate Wii U games on Linux - installing and optimising Cemu"></p>
+<p>Start a download</p>
+<pre><code class="language-bash">python3 wiiu_cdndownload.py titleid
+</code></pre>
+<p>This might take a while. You should see a progress bar.</p>
+<h2 id="decrypt">Decrypt</h2>
+<p>Now we need to decrypt the files. Find a &quot;Wii U common key&quot; with google, it should be 32 chars long and start with &quot;D7&quot;.</p>
+<p>Edit the <code>wiiu_decrypt.py</code> file and enter the key on line #21.</p>
+<pre><code class="language-bash">cd titleid/
+python3 ../wiiu_decrypt.py
+</code></pre>
+<h2 id="extract">Extract</h2>
+<p>Now, extract the files for emulation, from the same folder:</p>
+<pre><code class="language-bash">python3 ../wiiu_extract.py
+</code></pre>
+<p>You should see a long stream of files being created. Now repeat the process, from the download onward, with the other title ids (you should have three/two depending on the game: 00050000, 0005000C, and 0005000E).</p>
+<h1 id="playinggames">Playing Games</h1>
+<p>Now run Cemu.exe with wine:</p>
+<pre><code class="language-bash">cd ~/cemu
+vblank_mode=0 mesa_glthread=true wine Cemu.exe
+</code></pre>
+<p>On the top right, choose file --&gt; Install Update/DLC and select <code>Meta/Meta.xml</code> for each of the directories starting with 0005000C and 0005000E. Once finished, choose file --&gt; load and select <code>00050000-x/code/*.rpx</code>.</p>
+<p><img src="https://www.devpy.me/content/images/2018/08/Screenshot-from-2018-08-24-20-15-46.png" alt="How to emulate Wii U games on Linux - installing and optimising Cemu"></p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Steam for Linux can now run Windows games - with Vulkan performance built in]]></title><description><![CDATA[<!--kg-card-begin: markdown--><p>While Linux gaming has steadily evolved over the years, the number of titles on Windows far outnumbers the amount on Linux. There have been ways to get around this, using compatibility layers such as Wine (Wine Is Not an Emulator) - but Steam is now making this mainstream with their</p>]]></description><link>https://www.devpy.me/steam-for-linux-can-now-run-windows-games-with-vulkan-performance-built-in/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa4d</guid><category><![CDATA[wine]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Wed, 22 Aug 2018 17:46:55 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2018/08/Proton.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2018/08/Proton.png" alt="Steam for Linux can now run Windows games - with Vulkan performance built in"><p>While Linux gaming has steadily evolved over the years, the number of titles on Windows far outnumbers the amount on Linux. There have been ways to get around this, using compatibility layers such as Wine (Wine Is Not an Emulator) - but Steam is now making this mainstream with their latest version of Steam Play (now code-named Proton).</p>
+<p>Proton is a modified version of Wine created by Steam. It includes vkd3d, a vulkan based Direct3d 12 implementation, DXVK for Vulkan Direct3d 11, an OpenVR and Steamworks native API, Wine3d performance improvements, overhauled gamepad and fullscreen support, and &quot;esync&quot; for huge multi threaded improvements. The most exciting part of this is the Vulkan compatibility with DXVK, because of the large performance increase over standard Wine, and the amount of support a huge company like Steam gives to the project. Did I mention <a href="https://github.com/ValveSoftware/Proton">Proton is open source</a>?</p>
+<p>To try it out yourself, opt into the Steam client beta. Once updated, you can install Windows games the same way you install Linux games. Currently, only 25 games are supported, including large titles such as Final Fantasy VI, and Neir:Automata, but more will be added as the software matures, in small whitelist batches. Eventually, every game on Steam for Windows should be also available on Linux.</p>
+<h2 id="settingitup">Setting it up</h2>
+<p>To start using Steam Play / Proton, you need to opt into Steam beta.</p>
+<ol>
+<li>Click &quot;Steam&quot; on the top left of the app, then click &quot;Settings&quot;</li>
+<li>Under &quot;Beta Participation&quot;, select the &quot;Account&quot; tab and click &quot;Change...&quot;</li>
+<li>Select &quot;Steam Beta Update&quot; and click &quot;OK&quot;.</li>
+<li>Restart Steam</li>
+</ol>
+<p><img src="https://www.devpy.me/content/images/2018/08/Screenshot-from-2018-08-22-11-57-56.png" alt="Steam for Linux can now run Windows games - with Vulkan performance built in"></p>
+<p>Steam does not list this as a step, but I've found you need to enable steam play for all titles for Proton to work.</p>
+<p><img src="https://www.devpy.me/content/images/2018/08/Screenshot-from-2018-08-22-12-03-12.png" alt="Steam for Linux can now run Windows games - with Vulkan performance built in"></p>
+<p>Steam also recommends different drivers from defaults. Their quickstart for Ubuntu 18 can be found on <a href="https://github.com/ValveSoftware/Proton/blob/proton_3.7/PREREQS.md">Proton's github</a>.</p>
+<p>Now you can try installing a game. Here is the full list of supported games, taken from the <a href="https://steamcommunity.com/games/221410#announcements/detail/1696055855739350561">Steam community post</a>:</p>
+<ul class="bb_ul"><li><a class="bb_link" href="https://store.steampowered.com/app/620980" target="_blank" rel="noreferrer">Beat Saber</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/3300" target="_blank" rel="noreferrer">Bejeweled 2 Deluxe</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/698780" target="_blank" rel="noreferrer">Doki Doki Literature Club!</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/379720" target="_blank" rel="noreferrer">DOOM</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/2300" target="_blank" rel="noreferrer">DOOM II: Hell on Earth</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/650000" target="_blank" rel="noreferrer">DOOM VFR</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/588430" target="_blank" rel="noreferrer">Fallout Shelter</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/246840" target="_blank" rel="noreferrer">FATE</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/382900" target="_blank" rel="noreferrer">FINAL FANTASY VI</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/322170" target="_blank" rel="noreferrer">Geometry Dash</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/348250" target="_blank" rel="noreferrer">Google Earth VR</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/590380" target="_blank" rel="noreferrer">Into The Breach</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/49470" target="_blank" rel="noreferrer">Magic: The Gathering - Duels of the Planeswalkers 2012</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/97330" target="_blank" rel="noreferrer">Magic: The Gathering - Duels of the Planeswalkers 2013</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/22100" target="_blank" rel="noreferrer">Mount &amp; Blade</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/48720" target="_blank" rel="noreferrer">Mount &amp; Blade: With Fire &amp; Sword</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/524220" target="_blank" rel="noreferrer">NieR: Automata</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/24240" target="_blank" rel="noreferrer">PAYDAY: The Heist</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/2310" target="_blank" rel="noreferrer">QUAKE</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/4500" target="_blank" rel="noreferrer">S.T.A.L.K.E.R.: Shadow of Chernobyl</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/6060" target="_blank" rel="noreferrer">Star Wars: Battlefront 2</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/389730" target="_blank" rel="noreferrer">Tekken 7</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/23310" target="_blank" rel="noreferrer">The Last Remnant</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/57690" target="_blank" rel="noreferrer">Tropico 4</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/2280" target="_blank" rel="noreferrer">Ultimate Doom</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/4580" target="_blank" rel="noreferrer">Warhammer® 40,000: Dawn of War® - Dark Crusade</a><br></li><li><a class="bb_link" href="https://store.steampowered.com/app/9450" target="_blank" rel="noreferrer">Warhammer® 40,000: Dawn of War® - Soulstorm</a></li></ul>
+<p>The free games that are supported so far are <a class="bb_link" href="https://store.steampowered.com/app/698780" target="_blank" rel="noreferrer">Doki Doki Literature Club!</a>, <a class="bb_link" href="https://store.steampowered.com/app/588430" target="_blank" rel="noreferrer">Fallout Shelter</a>, and <a class="bb_link" href="https://store.steampowered.com/app/348250" target="_blank" rel="noreferrer">Google Earth VR</a>.</p>
+<p>Strangely enough, I found I could install games that were not on this list, such as PUBG:</p>
+<p><img src="https://www.devpy.me/content/images/2018/08/Screenshot-from-2018-08-22-12-05-03.png" alt="Steam for Linux can now run Windows games - with Vulkan performance built in"></p>
+<p>I think this means it's not officially supported, but will still run. I'm going to test Steam Play/Proton using Darwin project, since I don't own any other graphically intensive games that will run on Steam Play (I might test PUBG later on). It also looks like several other popular free games exclusively on Windows install with Steam Play, including Realm Royale.</p>
+<style>
+.videoWrapper {
+	position: relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	padding-top: 25px;
+	height: 0;
+}
+.videoWrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+</style>
+<div class="videoWrapper">
+<iframe width="640px" height="360px" src="https://www.youtube.com/embed/xVKZ9XBN_uQ" frameborder="0"></iframe>
+</div>
+<p>Darwin project played extremely smoothly with Steam Play, reaching 100+ fps on high (when obs was off, using vega 64). On windows, I get an average of 120fps. Expect more detailed benchmarks soon!</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Steam, quite likely the biggest gaming company in the world, releasing this kind of challenge to Windows gaming poses a huge threat to the Windows gaming ecosystem. Soon, we could see Steam OS make a comeback, with possible consoles that can run every game under the sun, with all the benefits of Linux, compete with Sony and Microsoft. The future of Linux gaming is looking brighter than ever.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[The Best Linux Lockscreen]]></title><description><![CDATA[The default login screens are pretty bad looking on pretty much every Linux distribution. This is a guide to fixing that.]]></description><link>https://www.devpy.me/the-best-linux-lockscreen/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa47</guid><category><![CDATA[themes]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Sun, 31 Dec 2017 00:40:42 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/12/devpy.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/12/devpy.png" alt="The Best Linux Lockscreen"><p>To be honest, the default lock screens, also known as greeters or display managers (when the lockscreen also manages the boot login), can leave looks to be desired on pretty much every Linux distribution. To fix that, we have several options - theme the lock screen you already have, change the lock screen, or login automatically and use another option such as i3lock.</p>
+<p>This guide shows you how to change the login screen background, edit the login screen font, use a login screen gtk theme, and change your user manager. This guide has sections for most major display managers, but the GDM guide has the most detail.</p>
+<h1 id="themingyourlockscreen">Theming your lockscreen</h1>
+<p>Typically the easiest option. The options below are for a few of the most popular display managers.</p>
+<h2 id="gdmdisplaymanager">GDM Display Manager</h2>
+<p>First back up the current theme:</p>
+<pre><code class="language-bash">sudo cp -v /usr/share/gnome-shell/gnome-shell-theme.gresource{,~}
+</code></pre>
+<blockquote>
+<p><strong>Note:</strong> Ubuntu 17+ uses a GDM config that is different than the default setup. If the following setup does not work for you please comment and I will try to help. All of the scripts I link below work for me on a fresh Fedora 27 system.</p>
+</blockquote>
+<p>Now you have a few options. If you simply want to change the font on your login manager or change the background, you can use my script:</p>
+<h3 id="editingthecurrenttheme">Editing the current theme</h3>
+<p>Download the scripts on the DevPy GitHub: <a href="https://github.com/devpytech/scripts/tree/master/gresource-extract">devpytech/scripts/gresource-extract</a>. Then run <code>./extract.sh</code> to extract your current theme to the &quot;theme&quot; folder in the same folder as the extract script.</p>
+<h4 id="editingthefont">Editing the font</h4>
+<p>Edit <code>gnome-shell.css</code>. Change the font to your custom font. E.g:</p>
+<pre><code class="language-css">stage {
+  font-family: 'Source Sans Pro', Sans-Serif;
+  font-size: 14px;
+  color: #eeeeec;
+}
+</code></pre>
+<h4 id="editingthebackground">Editing the background</h4>
+<p>Copy a background to the theme folder. Then edit <code>gnome-shell.css</code> and change the <code>#lockDialogGroup</code> section to the filename of your image. E.g:</p>
+<pre><code class="language-css">#lockDialogGroup {
+  background: #2e3436 url(resource:///org/gnome/shell/theme/background.jpg);
+  background-size: cover;
+  background-repeat: none;
+}
+</code></pre>
+<h4 id="buildingenabling">Building &amp; enabling</h4>
+<p>Run the <code>./build.sh</code> file from DevPy's GitHub. This will create a <code>.gresource</code> file in the theme folder.</p>
+<p>Finally, override the current gresource <strong>(make sure you have backed up the current file)</strong>:</p>
+<pre><code class="language-bash">sudo mv gnome-shell-theme.gresource /usr/share/gnome-shell/gnome-shell-theme.gresource
+</code></pre>
+<p>My result:</p>
+<p><img src="https://www.devpy.me/content/images/2017/12/custom.png" alt="The Best Linux Lockscreen"></p>
+<h3 id="usingyourgtktheme">Using your GTK Theme</h3>
+<p>My favourite method is to match the GTK theme by building a gresource file.</p>
+<p>Here are a few results for themes I have tested:</p>
+<h4 id="arc">Arc</h4>
+<p><img src="https://www.devpy.me/content/images/2017/12/arc-2.png" alt="The Best Linux Lockscreen"></p>
+<h4 id="pop">Pop</h4>
+<p><img src="https://www.devpy.me/content/images/2017/12/pop.png" alt="The Best Linux Lockscreen"></p>
+<h4 id="vertex">Vertex</h4>
+<p><img src="https://www.devpy.me/content/images/2017/12/vertex.png" alt="The Best Linux Lockscreen"></p>
+<p>You can build your own using my script here: <a href="https://github.com/devpytech/gtk-gresource">devpytech/gtk-gresource</a>.</p>
+<p>I've included prebuilt gresource files for the following themes:</p>
+<ul>
+<li>Arc</li>
+<li>Arc-Dark</li>
+<li>EvoPop</li>
+<li>Pop</li>
+<li>Pop-dark</li>
+<li>Vertex</li>
+</ul>
+<p>Usage:</p>
+<pre><code class="language-bash">git clone https://github.com/devpytech/gtk-gresource.git
+cd gtk-gresource
+
+# Replace Arc with the theme you want to use
+./build.sh Arc
+./switch.sh Arc
+</code></pre>
+<p>After a reboot the theme should show on login and lock.</p>
+<h2 id="lightdmdisplaymanager">LightDM Display Manager</h2>
+<p>LightDM is probably the second most popular display manager, after GDM. To install a theme, install both <code>lightdm</code> and <code>lightdm-webkit2-greeter</code> through your package manager. Then, navigate to <code>/usr/share/lightdm-webkit/themes/</code> through the terminal or a root file manager and copy the theme files there. Once finished, enable the theme in your <code>/etc/lightdm/lightdm-webkit2-greeter.conf</code> by setting <code>webkit-theme</code>.</p>
+<h3 id="material">Material</h3>
+<p><img src="https://www.devpy.me/content/images/2017/12/lightdm-material-1.png" alt="The Best Linux Lockscreen"></p>
+<p><a href="https://github.com/artur9010/lightdm-webkit-material">GitHub</a></p>
+<p><a href="https://github.com/artur9010/lightdm-webkit-material/archive/master.zip">Download</a></p>
+<h3 id="aether">Aether</h3>
+<p><img src="https://www.devpy.me/content/images/2017/12/lightdm-aether.png" alt="The Best Linux Lockscreen"></p>
+<p><a href="https://github.com/NoiSek/Aether">GitHub</a></p>
+<p><a href="https://github.com/NoiSek/Aether/archive/master.zip">Download</a></p>
+<h3 id="litarvan">Litarvan</h3>
+<p><img src="https://www.devpy.me/content/images/2017/12/lightdm-litarvan-1.png" alt="The Best Linux Lockscreen"></p>
+<p><a href="https://github.com/Litarvan/lightdm-webkit-theme-litarvan">GitHub</a></p>
+<p><a href="https://github.com/Litarvan/lightdm-webkit-theme-litarvan/archive/master.zip">Download</a></p>
+<h2 id="sddmdisplaymanager">SDDM Display Manager</h2>
+<p>SDDM is a display manager written from scratch. It's best known for being the default with KDE Plasma 5. To install an SDDM theme, simply move it to <code>/usr/share/sddm/themes/</code>, making sure that the folder name is the same as the theme name. You can enable a theme by editing <code>/etc/sddm.conf</code> under the <code>[Theme]</code> section and changing <code>Current</code> to the theme name.</p>
+<h3 id="aerial">Aerial</h3>
+<p><img src="https://www.devpy.me/content/images/2018/01/sddmtheme-aerial.gif" alt="The Best Linux Lockscreen"></p>
+<p>Aerial uses gifs on the lockscreen in the style of Apple TV screensavers.</p>
+<p><a href="https://github.com/3ximus/aerial-sddm-theme">GitHub</a></p>
+<p><a href="https://github.com/3ximus/aerial-sddm-theme/archive/master.zip">Download</a></p>
+<h3 id="deepin">Deepin</h3>
+<p><img src="https://www.devpy.me/content/images/2018/01/sddmtheme-deepin.png" alt="The Best Linux Lockscreen"></p>
+<p><a href="https://github.com/Match-Yang/sddm-deepin">GitHub</a></p>
+<p><a href="https://github.com/Match-Yang/sddm-deepin/archive/master.zip">Download</a></p>
+<h1 id="changingyourdisplaymanager">Changing your Display Manager</h1>
+<p>This option will change the way you login ... forever. Or at least until you change back. Once you have installed a display manager, the way you change to it depends on your linux distribution. On Ubuntu, run &quot;<code>sudo dpkg-reconfigure gdm3</code>&quot; replacing gdm3 with the current display manager.</p>
+<h2 id="gdm">GDM</h2>
+<p>You can install GDM with the following:</p>
+<h3 id="ubuntu">Ubuntu</h3>
+<pre><code class="language-bash">sudo apt install gdm3
+</code></pre>
+<h3 id="fedora">Fedora</h3>
+<pre><code class="language-bash">sudo dnf install gdm
+</code></pre>
+<h3 id="arch">Arch</h3>
+<pre><code class="language-bash">sudo pacman -S gdm
+</code></pre>
+<p>On other distributions, try searching gdm in the package manager.</p>
+<h2 id="lightdm">LightDM</h2>
+<p>You can install GDM with the following:</p>
+<h3 id="ubuntu">Ubuntu</h3>
+<pre><code class="language-bash">sudo apt install lightdm
+</code></pre>
+<h3 id="fedora">Fedora</h3>
+<pre><code class="language-bash">sudo dnf install lightdm
+</code></pre>
+<h3 id="arch">Arch</h3>
+<pre><code class="language-bash">sudo pacman -S lightdm
+</code></pre>
+<p>On other distributions, try searching lightdm in the package manager.</p>
+<h2 id="sddm">SDDM</h2>
+<p>You can install SDDM with the following:</p>
+<h3 id="ubuntu">Ubuntu</h3>
+<pre><code class="language-bash">sudo apt install sddm
+</code></pre>
+<h3 id="fedora">Fedora</h3>
+<pre><code class="language-bash">sudo dnf install sddm
+</code></pre>
+<h3 id="arch">Arch</h3>
+<pre><code class="language-bash">sudo pacman -S sddm
+</code></pre>
+<p>On other distributions, try searching sddm in the package manager.</p>
+<h1 id="notusingadisplaymanageratall">Not Using a Display Manager At All</h1>
+<p>If you like to login with the console, you can simply disable the Display Manager services:</p>
+<pre><code class="language-bash">sudo service gdm disable
+sudo service lightdm disable
+</code></pre>
+<p><img src="https://www.devpy.me/content/images/2017/12/console.png" alt="The Best Linux Lockscreen"></p>
+<p>If you use this option, I suggest that you install a screenlocker / screensaver to help avoid screwing up your monitor (keeping the same image on the monitor for a long time can freeze some pixels).</p>
+<h2 id="xscreensaver">XScreenSaver</h2>
+<p>XScreenSaver ships with most distributions, but if you don't have it, instructions can be found <a href="https://www.jwz.org/xscreensaver/download.html">here</a>. Theming is rather rudimentary but you can change the colours by editing <code>~/.Xresources</code>.</p>
+<h2 id="i3lock">i3lock</h2>
+<p>Probably my favourite screen locker, i3lock is simple and has many derivations to choose from. My favourite derivation is i3lock-colors to customize the look and image.</p>
+<h3 id="default">Default</h3>
+<p><img src="https://www.devpy.me/content/images/2017/12/i3lock-1.png" alt="The Best Linux Lockscreen"></p>
+<h3 id="mycustomwallpaperconservingscript">My custom wallpaper conserving script</h3>
+<p><img src="https://www.devpy.me/content/images/2017/12/xwobf.png" alt="The Best Linux Lockscreen"></p>
+<pre><code class="language-bash">#!/bin/bash
+
+scrot /tmp/screen.png
+xwobf -s 11 /tmp/screen.png
+i3lock -i /tmp/screen.png
+rm /tmp/screen.png
+</code></pre>
+<p>And that's it! If you want to go back to the defaults, simply re-enable GDM or LightDM.</p>
+<p>Thanks for reading. Feel free to share your custom login setup in the comments below.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Snapcraft, AppImage, and Flatpak ... which one is the best?]]></title><description><![CDATA[Distro agnostic packages are a long time coming. There are dozens of package systems on thousands of distros; cross-distro packages are here to fix that.]]></description><link>https://www.devpy.me/snapcraft-appimage-flatpak/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa34</guid><category><![CDATA[open source news]]></category><category><![CDATA[distributions]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Sun, 24 Sep 2017 17:27:38 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/09/snapappflat.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/09/snapappflat.png" alt="Snapcraft, AppImage, and Flatpak ... which one is the best?"><p>Distro agnostic installation of packages is a long time coming. There are literally <em>thousands</em> of different distros, and a fair amount of them implement their own package managers - that means there are dozens of different package systems to develop for. This is where cross-distro packages come in. There are 3 major systems: Flatpak, AppImage, and Snapcraft. Snapcraft is by Ubuntu, and the other two started as individual projects.</p>
+<h1 id="snapcraft">Snapcraft</h1>
+<p><img src="https://www.devpy.me/content/images/2017/09/snapcraft.jpg" alt="Snapcraft, AppImage, and Flatpak ... which one is the best?"></p>
+<p><em>Why Snapcraft?</em></p>
+<p>Snapcraft is a project developed by Canonical (parent company of Ubuntu). Their website says that snaps are packages that are &quot;for every Linux desktop, server, cloud or device, and deliver updates directly&quot;. This is a bold claim - their website also points out that snaps update automatically. It's not really clear what the difference is between snaps and deb packages - you need to install services to get snap to work, so it's basically just installing another package manager on your system.</p>
+<p>It does come with the benefits of a package manager though: A central repo, managed updates. Their sandboxing is provided by AppArmor, Ubuntu's app permission management software.</p>
+<h2 id="install">Install</h2>
+ <div class="accordion">
+###Arch
+<pre><code class="language-bash">sudo pacman -S snapd
+</code></pre>
+<h3 id="ubuntu">Ubuntu</h3>
+<pre><code class="language-bash">sudo apt install snapd
+</code></pre>
+<h3 id="debian">Debian</h3>
+<pre><code class="language-bash"># On Sid:
+sudo apt install snapd
+</code></pre>
+<h3 id="fedora">Fedora</h3>
+<pre><code class="language-bash">sudo dnf install snapd
+
+# Fedora 24 users
+ sudo systemctl enable --now snapd.socket
+</code></pre>
+<h3 id="gentoo">Gentoo</h3>
+<p>Install <a href="https://github.com/zyga/gentoo-snappy">the overlay</a>.</p>
+<h3 id="opensuse">OpenSuse</h3>
+<pre><code class="language-bash">sudo zypper addrepo http://download.opensuse.org/repositories/system:/snappy/openSUSE_Leap_42.2/ snappy
+sudo zypper install snapd
+</code></pre>
+</div>
+<h2 id="snapcraftdirectory">Snapcraft Directory</h2>
+<p>(1012 apps at time of writing) <a href="https://uappexplorer.com/snaps">UAppExplorer</a></p>
+<h1 id="appimage">AppImage</h1>
+<p><img src="https://www.devpy.me/content/images/2017/09/Screenshot-from-2017-09-24-11-19-33.png" alt="Snapcraft, AppImage, and Flatpak ... which one is the best?"></p>
+<p><em>Why AppImage?</em></p>
+<p>AppImage is by far the simplest solution of the three. To use an AppImage, you simply add permission to execute the file and then run it, the same way as running a bash script. However, not everything is sunny: there is <em>optional</em> sandboxing, and to install an update, you have to replace the entire installation (there is a basic updater but not many projects use it).</p>
+<p>To try it out, I installed Etcher, a program to burn iso files to disks. Here is the process (I am doing the entire process through the GUI. Installing an AppImage from the shell is just as easy).</p>
+<p>1. <a href="https://github.com/resin-io/etcher/releases/download/v1.1.2/etcher-1.1.2-linux-x86_64.zip">Download the Etcher 1.1.2 AppImage</a></p>
+<p>2. Extract the zip file and open the extracted files.</p>
+<p><img src="https://www.devpy.me/content/images/2017/09/step2.png" alt="Snapcraft, AppImage, and Flatpak ... which one is the best?"></p>
+<p>3. Right click the `.appimage` file, select properties, and ensure that "allow executing file" is checked.</p>
+<p><img src="https://www.devpy.me/content/images/2017/09/step3.png" alt="Snapcraft, AppImage, and Flatpak ... which one is the best?"></p>
+<p>4. Double click the AppImage file</p>
+<p><img src="https://www.devpy.me/content/images/2017/09/step4.png" alt="Snapcraft, AppImage, and Flatpak ... which one is the best?"></p>
+<p>Although easy to install, the pain comes after a few months. I think that a system using AppImage as the main software management tool would be a pain; it would have to replace all installations every few months.</p>
+<h2 id="appimagedirectory">AppImage Directory</h2>
+<p>(120 apps at time of writing)<br>
+<a href="https://appimage.github.io/apps/">AppImageHub</a></p>
+<h1 id="flatpak">Flatpak</h1>
+<p><img src="https://www.devpy.me/content/images/2017/09/Screenshot-from-2017-09-24-11-51-16.png" alt="Snapcraft, AppImage, and Flatpak ... which one is the best?"></p>
+<p><em>Why Flatpak?</em></p>
+<p>What makes flatpak different from both Snapcraft and AppImage is that is brings shared, constantly updated runtimes (e.g. the kind of libraries that make Steam a mess to install on distros that are not Ubuntu) into the picture. Unlike AppImage, libraries/runtimes do not need to be bundled, reducing file size of apps and providing a much cleaner, auto updating experience. (Also, <a href="https://blogs.gnome.org/hughsie/2016/07/05/flatpak-and-gnome-software/">it's integrated</a> into gnome-software already...)</p>
+<p>One of the caveats is that there is no central repo. For every new app from a different developer, you have to add a new repo. Sandboxing custom, with SELinux support.</p>
+<h2 id="install">Install</h2>
+ <div class="accordion">
+### Arch
+<pre><code class="language-bash">sudo pacman -S flatpak
+</code></pre>
+<h3 id="ubuntu">Ubuntu</h3>
+<pre><code class="language-bash">sudo add-apt-repository ppa:alexlarsson/flatpak
+sudo apt update
+sudo apt install flatpak
+</code></pre>
+<h3 id="debian">Debian</h3>
+<pre><code class="language-bash">sudo apt install flatpak
+</code></pre>
+<h3 id="fedora">Fedora</h3>
+<pre><code class="language-bash">sudo dnf install flatpak
+</code></pre>
+<h3 id="gentoo">Gentoo</h3>
+<p>Install <a href="https://github.com/fosero/flatpak-overlay">the overlay</a>.</p>
+<h3 id="opensuse">OpenSuse</h3>
+<pre><code class="language-bash">sudo zypper install flatpak
+</code></pre>
+</div>
+<h2 id="flatpackdirectory">Flatpack Directory</h2>
+<p>(88 apps listed on their website at time of writing)<br>
+<a href="https://flathub.org/apps.html">Flathub</a></p>
+<h1 id="conclusion">Conclusion</h1>
+<div class="horizontal-scroll-box">
+<table style="margin-top:15px">
+    <tr>
+        <th>Feature</th>
+        <th>Snapcraft</th>
+        <th>AppImage</th>
+        <th>Flatpak</th>
+    </tr>
+    <tr>
+        <td>No software necessary to install a package</td>
+        <td>No</td>
+        <td>Yes</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Shared runtimes</td>
+        <td>Basic</td>
+        <td>None</td>
+        <td>Full</td>
+    </tr>
+    <tr>
+        <td>Sanboxing</td>
+        <td>AppArmor</td>
+        <td>None</td>
+        <td>Custom</td>
+    </tr>
+    <tr>
+        <td>Repository support</td>
+        <td>Yes</td>
+        <td>No</td>
+        <td>Yes</td>
+    </tr>
+    <tr>
+        <td>Central repo</td>
+        <td>Yes</td>
+        <td>No</td>
+        <td>No</td>
+    </tr>
+    <tr>
+        <td>Updates</td>
+        <td>Automatic</td>
+        <td>None</td>
+        <td>Automatic</td>
+    </tr>
+</table>
+</div>
+<p>Personally, I would bet on Flatpak. A lot of it is similar to Snapcraft, but I found the installation (on distros other than Ubuntu, e.g. Arch) of Snapcraft a lot more difficult and buggy, and the updates and install process of Flatpak was easier. Even without a central repo, the process seems more solid.</p>
+<p>Their shared library system works across any distro automatically, and they include more variety and better apps (Steam is actually packaged as a Flatpak now! Goodbye difficult install on Arch). Also, the awareness of Flatpak is better in the Linux community; Google &quot;Snapcraft&quot; and the first result is a Minecraft server.</p>
+<p>Even though AppImage has <a href="https://plus.google.com/+LinusTorvalds/posts/WyrATKUnmrS">Linus Torvald's vouch</a>, Flatpak beats it through smaller app files and better updates - even though you need to install a package to start using Flatpak, the features it provides are much better in the end.</p>
+<p><em>Don't agree? Share your thoughts below</em></p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Budgie Desktop / Solus: Minimal & Clean Desktop Environment]]></title><description><![CDATA[You may have heard of Budgie Desktop. It's a clean & minimal DE with nice features and good looks.]]></description><link>https://www.devpy.me/budgie-desktop-solus-minimal-clean-desktop-environment/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa40</guid><category><![CDATA[desktop environments]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Thu, 15 Jun 2017 03:15:11 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/06/budgie.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/06/budgie.png" alt="Budgie Desktop / Solus: Minimal & Clean Desktop Environment"><p>You may have heard of (or currently use!) Budgie Desktop. It's a minimal, but full featured, workspace currently based upon the GNOME/GTK stack. (The developer <a href="https://budgie-desktop.org/2017/01/25/kicking-off-budgie-11/">has</a> announced they will be moving to QT in the future).</p>
+<p>Recently, the creator of Solus &amp; Budgie, Ikey Doherty, left his job at Intel <a href="https://plus.google.com/+IkeyDoherty/posts/f7wLbMqzVtj">to work on the Solus Project full time</a>. This, coupled with another developer, Stefan Ric, <a href="https://solus-project.com/2017/06/13/we-are-growing/">joining the team</a> means that Solus users should prepare for an influx of new development.</p>
+<h2 id="solus">Solus</h2>
+<p>One choice the Solus Project made when starting was not to base Solus on an existing distro, such as Fedora, but to create their own package manager and build system called eopkg. I am not a huge fan of this approach, as looking for scripts and compiling everything I wanted to install (most of what I needed was not in their software center), took a while and got kind of annoying.</p>
+<p>However, you should definitely take this with a grain of salt as it appears that the target users for Solus are people newer to Linux. For that demographic, the software center should be completely sufficient; it includes everything a casual user would need.</p>
+<p>The software center is organized by a two-level category based system. The top level shows application by broad group and includes Desktop, Gaming, Multimedia, Internet, Office, Programming, Security, and System software.</p>
+<p><img src="https://www.devpy.me/content/images/2017/06/Screenshot-from-2017-06-14-12-03-16.png" alt="Budgie Desktop / Solus: Minimal & Clean Desktop Environment"></p>
+<p>Third party software is Solus's section for larger scale, often updated apps. This is where you find Chrome, Jetbrains IDEs, Skype, and Spotify. This can be compared to the AUR on Arch except that it is far more limited.</p>
+<p><img src="https://www.devpy.me/content/images/2017/06/Screenshot-from-2017-06-14-11-49-09.png" alt="Budgie Desktop / Solus: Minimal & Clean Desktop Environment"></p>
+<h3 id="installingsolus">Installing Solus</h3>
+<p>Solus can be installed using <a href="https://solus-project.com/download/">their download page</a>.</p>
+<h2 id="budgiedesktop">Budgie Desktop</h2>
+<p>Budgie is like a breathe of fresh air. I am not a fan of desktops with heavy effects and too many options (KDE does not really work for me) but I also don't like changing config files and writing scripts (like for BSPWM) when I just want to program. Budgie desktop hits the sweet spot between these extremes.</p>
+<p>Budgie does not look like anything special when you get started. It can be compared to Ubuntu MATE / GNOME 2 but feels more modern to me. However, as you continue using it, Budgie feels more comfortable and homely than other desktops.</p>
+<h3 id="installingbudgie">Installing Budgie</h3>
+<p>To install Budgie desktop on a distro other than Solus, use these commands.</p>
+<p><strong>Arch</strong></p>
+<p><code>budgie-desktop</code> on the repos:</p>
+<pre><code class="language-bash">sudo pacman -S budgie-desktop
+</code></pre>
+<p><strong>Ubuntu / Debian</strong></p>
+<p>We need to add a ppa:</p>
+<pre><code class="language-bash">sudo add-apt-repository ppa:budgie-remix/ppa
+sudo apt-get update
+sudo apt-get install budgie-desktop
+</code></pre>
+<p><strong>Fedora</strong></p>
+<p>Change the <code>24</code> to the version of Fedora (22, 23, 24) that you are using:</p>
+<pre><code class="language-bash">sudo dnf config-manager --add-repo http://download.opensuse.org/repositories/home:ikeydoherty:solus-project/Fedora_24/home:ikeydoherty:solus-project.repo
+sudo dnf install budgie-desktop
+</code></pre>
+<p>To install on other distros, Google it.</p>
+<h3 id="raven">Raven</h3>
+<p>The Raven sidebar is where you control your calendar, notifications, general settings, and your panel settings. Ikey is talking about implementing more custom and advanced widgets which could be added to Raven, but right now it simply acts as a conglomerate of a settings widget and a status bar.</p>
+<p><img src="https://www.devpy.me/content/images/2017/06/raven.png" alt="Budgie Desktop / Solus: Minimal & Clean Desktop Environment"></p>
+<h3 id="budgiemenu">Budgie Menu</h3>
+<p>This is another part of Budgie that looks and feels very simple but does the job well. The Menu initially has a list of all installed applications, under category headers. Clicking on the categories (mouse rollover can be optionally enabled) takes you to a list of apps within the category.</p>
+<p>The Menu has a very nice feature that &quot;learns&quot; what kind of apps you use the most and shows those first, within category, in the full list, and on search by keeping a file with references to most opened apps.</p>
+<p><img src="https://www.devpy.me/content/images/2017/06/transparentmenu.png" alt="Budgie Desktop / Solus: Minimal & Clean Desktop Environment"></p>
+<h3 id="applets">Applets</h3>
+<p>Applets are buttons or menus that can be added to the panel. Budgie comes with a limited selection but there are several great additions made by developers. Here are some I always add:</p>
+<p><strong>Screenshot Applet</strong></p>
+<p>Take screenshots and upload automatically to services such as imgur and ftp.</p>
+<p><img src="https://www.devpy.me/content/images/2017/06/screenshot.png" alt="Budgie Desktop / Solus: Minimal & Clean Desktop Environment"></p>
+<p>On Solus</p>
+<pre><code class="language-bash">sudo eopkg it budgie-screenshot-applet
+</code></pre>
+<p>On other distros, see the <a href="https://github.com/cybre/budgie-screenshot-applet">GitHub page</a>.</p>
+<p><strong>Hastebin Applet</strong></p>
+<p>Pastebin your code right from the panel.</p>
+<p><img src="https://www.devpy.me/content/images/2017/06/haste.png" alt="Budgie Desktop / Solus: Minimal & Clean Desktop Environment"></p>
+<p>On Solus</p>
+<pre><code class="language-bash">sudo eopkg it budgie-haste-applet
+</code></pre>
+<p>On other distros, see the <a href="https://github.com/cybre/budgie-haste-applet">GitHub page</a>.</p>
+<h2 id="insummary">In summary,</h2>
+<p>Budgie is an interesting new distro you should look out for. Solus is certainly going in a good direction, and with Solus's creator starting to work on it full time, we should see a lot of new development. Budgie hits that sweet spot of looks and functionality, and I would like to see more of this new distro/desktop.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[10 Of The Best Linux Icon Themes Compared]]></title><description><![CDATA[Linux generally has good, clean looks but the icons are sometimes... a bit lacking. However, with a few small changes, your desktop can look amazing!]]></description><link>https://www.devpy.me/10-of-the-best-linux-icon-themes-compared/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa3e</guid><category><![CDATA[themes]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Thu, 20 Apr 2017 03:48:49 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/04/outputfile_1.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/04/outputfile_1.png" alt="10 Of The Best Linux Icon Themes Compared"><p>Linux generally has good, clean looks but the icons are sometimes... a bit lacking. However, with a few small changes, your desktop can look amazing with these icon packs. Icon packs are generally a large amount of images which control how your application, file, and system tray icons look.</p>
+<p>Most of the themes below will have installations based in the terminal (Ubuntu / Fedora / Arch), but for some of them, you need to download the actual files. In those cases, you can simply download the theme archive (<code>.zip</code>, <code>.tar.gz</code>), and extract to the folder <code>.icons</code> for the icon theme to be installed on your user (note: on Fedora, the default is <code>.local/share/icons</code>). To install for all users, move the icon theme folder to <code>/usr/share/icons/</code> instead.</p>
+<p>The circular app launcher you see in screenshots is <a href="//simmesimme.github.io/gnome-pie.html">Gnome Pie</a>.</p>
+<h1 id="papirus">Papirus</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/papirus-arc.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#arc">Arc dark gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/papirus-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>Papirus is a new-ish icon theme from the Papirus Development Team. It is based on the Paper icon theme, but I like the feel of Papirus much better. The <a href="//github.com/PapirusDevelopmentTeam">Papirus Development Team</a> has also made themes for LibreOffice, SMPlayer, and Filezilla, integrating them with the Arc gtk theme.</p>
+<p><a href="//github.com/PapirusDevelopmentTeam/papirus-icon-theme#installation">Installation</a></p>
+<h1 id="paper">Paper</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/paper.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#paper">Paper gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/paper-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>Paper is an icon theme by <a href="//github.com/snwh">snwh</a>. Paper is one of the most popular aesthetic kits, and includes a gtk theme with brighter colors, but less icons than other themes (Paper lacks icons for coding files which Papirus and Numix have).</p>
+<p><a href="//snwh.org/paper/download">Installation</a></p>
+<h1 id="numix">Numix</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/numix-numix.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#numix">Numix gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/numix-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications - Numix has less icons than alternatives; result is this ugly fallback</em></p>
+<p>Numix is an icon theme by the Numix Project, a big player in Linux theming. Their themes are the default on several distros, and are popular with users. Numix stands up to these expectations fairly well, but (in my opinion) lacks the subtle vibe you see with Paper and Papirus.</p>
+<p><a href="//github.com/numixproject/numix-icon-theme#installation">Installation</a></p>
+<h1 id="evolvere">Evolvere</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/evolvere.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#vertex">Vertex light gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/evolvere-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>Evolvere is a square icon theme that is relatively unheard of. Surprisingly, I found the icons to be very complete and to look pretty good! Inside what the author calls &quot;Evolvere Suite&quot;, you will find variants of the theme with different folder styles and slightly different icons. The one I show above is &quot;Evolvere Sunken&quot;.</p>
+<p><a href="//github.com/franksouza183/EvolvereSuit#evolveresuit">Installation</a></p>
+<h1 id="moka">Moka</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/moka-moka.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the Adwaita gtk theme</em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/moka-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>Moka is another great icon theme by <a href="//github.com/snwh">snwh</a>. It is used as a baseline for several other themes, such as the Arc icon theme. It's shown here with the Adwaita theme, the default for Gnome users. Moka has a slight circular border- I like it.</p>
+<p><a href="//snwh.org/moka/download">Installation</a></p>
+<h1 id="arc">Arc</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/arc.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#arc">Arc light gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/arc-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications- Arc falls back to Moka</em></p>
+<p>The Arc icon theme, created by the developer of the insanely popular Arc gtk theme, is a great material icon theme; I just wish they would make some more icons! A lot of application icons fall back to other themes.</p>
+<p><a href="//github.com/horst3180/arc-icon-theme#installation">Installation</a></p>
+<h1 id="flattr">Flattr</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/flattr-flattr.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#arc">Arc darker gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/flattr-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>Flattr is another material inspired icon theme; it does a fairly good job at it. Several other icon themes, such as Super Flat Remix, are inspired by it.</p>
+<p><a href="//github.com/Nitrux/luv-icon-theme#install">Installation</a></p>
+<h1 id="lacapitaine">La Capitaine</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/lacapitaine.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.gnome-look.org/p/1171688/">Gnome OSX ii gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/lacapitaine-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>La Capitaine is an icon theme that &quot;takes inspiration from the latest iterations of macOS and Google's Material Design&quot;. I'm showing it here with the Gnome OSX ii gtk theme, and the duo makes a good Mac-esque look.</p>
+<p>La Capitaine is based on a set called &quot;Antü&quot; by Fabián Alexis, which is used in KaOS (KDE distro).</p>
+<p><a href="//krourke.org/projects/art/la-capitaine-icon-theme">Installation</a></p>
+<h1 id="xenlismwildfire">Xenlism Wildfire</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/xenlism.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#vertex">Vertex dark gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/xenlism-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>Xenlism Wildfire is an icon theme that tries something a bit different; it includes more &quot;images within images&quot; and looks a bit more fun. Xenlism icons have a bit of a circular look, as shown in the wheel screenshot.</p>
+<p><a href="//xenlism.github.io/wildfire/">Installation</a></p>
+<h1 id="faenza">Faenza</h1>
+<p><img src="//www.devpy.me/content/images/2017/04/faenza.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Shown with the <a href="//www.devpy.me/10-of-the-best-linux-themes-compared/#adapta">Adapta-Nokto gtk theme</a></em></p>
+<p><img src="//www.devpy.me/content/images/2017/04/faenza-wheel.png" alt="10 Of The Best Linux Icon Themes Compared"></p>
+<p><em>Common applications</em></p>
+<p>Faenza is another &quot;older looking&quot; icon theme, with more of a <a href="//www.flatvsrealism.com/">realism</a> texture than flat themes like Paper, Papirus, and Xenlism. Applications are mostly shown as squares, and the icons have slight drop shadows.</p>
+<p><a href="//tiheum.deviantart.com/art/Faenza-Icons-173323228">Installation</a></p>
+<hr>
+<p>To see other topics about Linux themes, <a href="//blog.devpy.me/tag/themes">follow this link.</a></p>
+<p>Do you like these icon themes? Do you hate them? Drop a line in the comments below with your favorite icon theme, and I'll be sure to take a look.</p>
+<p>If you want the wallpapers that I used, <a href="//imgur.com/a/tMZ1s">here</a> is the imgur gallery I made. <a href="//media.idownloadblog.com/wp-content/uploads/2016/06/macOS-Sierra-Wallpaper-Macbook-Wallpaper.jpg">Here</a> is the wall for La Capitaine, and <a href="//raw.githubusercontent.com/adapta-project/adapta-backgrounds/master/backgrounds/tealized.jpg">here</a> is the wall for Faenza.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Building a Music Controlling Python Start Page for Linux]]></title><description><![CDATA[By bundling Playerctl with Bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage.]]></description><link>https://www.devpy.me/building-a-python-music-indicating-start-page-2/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa3d</guid><category><![CDATA[programming]]></category><category><![CDATA[themes]]></category><category><![CDATA[python]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Tue, 21 Feb 2017 18:44:16 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif" alt="Building a Music Controlling Python Start Page for Linux"><p>By using the Gnome GLib apis, we can use the Playerctl Linux package with Python. Bundling this with bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage.</p>
+<h2 id="dependencies">Dependencies</h2>
+<p>You will of course need Python. Here, I use python2 because gevent (the websocket) does not support Python3.</p>
+<p>Linux packages you need:</p>
+<ul>
+<li><a href="https://github.com/acrisci/playerctl">Playerctl</a></li>
+</ul>
+<p>Python dependencies (install with pip):</p>
+<ul>
+<li>bottle</li>
+<li>bottle-websocket</li>
+</ul>
+<h2 id="github">Github</h2>
+<p>You can download all the code for this project <a href="https://github.com/devpytech/musicpage">on DevPy's github here</a>.</p>
+<p>You can clone this to your computer with</p>
+<pre><code class="language-bash">git clone https://github.com/devpytech/musicpage.git
+</code></pre>
+<h2 id="addingawebsocket">Adding a websocket</h2>
+<p>First we need to import the (extensive) list of packages.</p>
+<pre><code class="language-python">#!/usr/bin/env python2
+from bottle.ext.websocket import GeventWebSocketServer
+import gi
+gi.require_version('Playerctl', '1.0')
+from gi.repository import GLib, GObject, Playerctl
+from bottle.ext.websocket import websocket
+from geventwebsocket.exceptions import WebSocketError
+from bottle import run, get
+import threading
+import os
+from gevent import monkey
+monkey.patch_all()
+
+print(&quot;starting websocket&quot;)
+</code></pre>
+<h3 id="addingaroute">Adding a route</h3>
+<p>When the main page connects to the websocket, we send the attributes so we can update the display.</p>
+<pre><code class="language-python">@get('/websocket', apply=[websocket]) #provide a websocket connection
+def echo(ws):
+    print(&quot;connected&quot;)
+    # send the music status
+    ws.send('%s,%s,%s,%s' % (os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property(&quot;status&quot;)))
+</code></pre>
+<h3 id="playerctlprocess">Playerctl process</h3>
+<p>We can make a new Playerctl player with <code>player = Playerctl.Player()</code> and run a loop to check for updates with <code>player.on('metadata', on_track_change)</code> and <code>GLib.MainLoop().run()</code>. When the track is updated, we send a message to the webpage.</p>
+<pre><code class="language-python">@get('/websocket', apply=[websocket])
+def echo(ws):
+    print(&quot;connected&quot;)
+    # send the music status
+    ws.send('%s,%s,%s,%s' % (os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property(&quot;status&quot;)))
+    def on_track_change(player, e):
+        #this function will run when the music is updated (paused, skipped, etc.)
+        try: #see if the connection is still open
+            ws.send('%s,%s,%s,%s' % (os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property(&quot;status&quot;)))
+        except WebSocketError: #if it's not open, stop the process
+            player.stop()
+            loop.quit()
+            ws.close()
+
+    player = Playerctl.Player()
+    player.on('metadata', on_track_change) #listen for music updates
+
+    loop = GLib.MainLoop() 
+    loop.run() #run the playerctl updater
+    print(&quot;Disconnected from websocket&quot;)
+
+run(host='0.0.0.0', port=7000, server=GeventWebSocketServer) #run the server
+</code></pre>
+<h2 id="frontend">Frontend</h2>
+<p>In this section, we create the webpage that is shown (and updated in real time) for the user.</p>
+<h3 id="settings">Settings</h3>
+<p>Here we add color choosing and links that we use in html later.</p>
+<pre><code class="language-python">#!/usr/bin/env python2
+from bottle import route, run, request, get, post, static_file
+import gi
+gi.require_version('Playerctl', '1.0')
+from gi.repository import GLib, GObject, Playerctl
+from subprocess import Popen
+import sys
+import os
+
+Popen([sys.executable, './sendup.py']) #run the websocket script in the same folder (used to update info)
+
+############
+# SETTINGS
+############
+
+links = [['DevPy','http://DevPy.me'],['Reddit','http://Reddit.com'],['Google','http://Google.com']] #List of links to add to page
+
+theme = 'dark' #light or dark theme (sets colors)
+
+############
+# /SETTINGS
+############
+
+if theme == 'dark':
+    bgc = '#222'
+    fgc = 'rgba(255,255,255,0.6)'
+    bw = 'gray'
+else:
+    bgc = '#fff'
+    fgc = '#111'
+    bw = 'black'
+
+for x in range(len(links)):
+    #create list of links
+    links[x] = '&lt;a class=&quot;db link no-underline underline-hover '+bw+'&quot; href=&quot;'+links[x][1]+'&quot;&gt;'+links[x][0]+'&lt;/a&gt;'
+
+linkhtml = '''&lt;div class=&quot;db center&quot; style=&quot;width: 182px;&quot;&gt;&lt;div class=&quot;mt4 lh-copy&quot;&gt;'''
+
+#add the links together
+for x in links:
+    linkhtml += x
+
+linkhtml += '''&lt;/div&gt;&lt;/div&gt;'''
+</code></pre>
+<h3 id="html">HTML</h3>
+<p>We generate the initial look of the app. The artist, song, and image are initialized as well.</p>
+<pre><code class="language-python">@get('/') # or @route('/login')
+def index():
+    player = Playerctl.Player() #grab a player
+    try: #Check if a music app is open (spotify, audacious, vlc,...)
+        title = player.get_title()
+        artist = player.get_artist()
+        img = os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read()
+    except: #if nothing is open just show blank music
+        title = ''
+        artist = ''
+        img = ''
+
+    return '''
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Start Page&lt;/title&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;/static/tachyons.css&quot; /&gt;
+&lt;style&gt;
+/* Here we add the icons for play/pause/next/forward */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url(/static/mat.woff2) format('woff2');
+}
+.material-icons {
+  cursor: pointer;
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+.material-icons.md-light { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark { color: rgba(255, 255, 255, 1); }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style=&quot;background-color:'''+bgc+'''&quot;&gt;
+&lt;div style=&quot;position:relative; top: 35%%; transform: translateY(-50%%); &quot;&gt;
+&lt;div class=&quot;mt4 db center black link&quot; style=&quot;width: 178px;&quot;&gt;
+  &lt;img id=&quot;img&quot; style=&quot;width:180px;height:178px;background-color:#222;&quot;class=&quot;db ba b--black-10&quot; src=&quot;%s&quot;&gt;
+  &lt;dl class=&quot;mt2 lh-copy&quot;&gt;
+    &lt;dt class=&quot;clip&quot;&gt;Title&lt;/dt&gt;
+    &lt;dd id=&quot;title&quot; class=&quot;ml0 fw9&quot; style=&quot;color:''' % (img)+fgc+'''&quot;&gt;%s&lt;/dd&gt;
+    &lt;dt class=&quot;clip&quot;&gt;Artist&lt;/dt&gt;
+    &lt;dd id=&quot;artist&quot; class=&quot;ml0 gray&quot;&gt;%s&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;div style=&quot;text-align:center;color:''' % (title, artist)+fgc+'''&quot;&gt;
+    &lt;a onclick=&quot;previous();&quot; style=&quot;float:left;&quot;&gt;&lt;i class=&quot;material-icons md-'''+theme+'''&quot;&gt;skip_previous&lt;/i&gt;&lt;/a&gt;
+    &lt;a onclick=&quot;toggle();&quot;&gt;&lt;i id =&quot;stateicon&quot; style=&quot;width:32px;&quot; class=&quot;material-icons md-'''+theme+'''&quot;&gt;pause_arrow&lt;/i&gt;&lt;/a&gt;
+    &lt;a onclick=&quot;next();&quot; style=&quot;float:right;&quot;&gt;&lt;i class=&quot;material-icons md-'''+theme+'''&quot;&gt;skip_next&lt;/i&gt;&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+''' + linkhtml + # add the scripts below here
+</code></pre>
+<h3 id="scripts">Scripts</h3>
+<p>Here we add some jquery scripts to talk to the server.</p>
+<pre><code class="language-python"># attach this to the previous html code
+'''
+&lt;/div&gt;
+&lt;script src=&quot;/static/jquery-3.1.1.min.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+var ws;
+ws = new WebSocket(&quot;ws://0.0.0.0:7000/websocket&quot;);
+ws.onopen = function (evt) {
+  ws.send(&quot;Connected&quot;);
+};
+ws.onclose = function (evt) {
+  ws.send(&quot;Closed&quot;);
+};
+
+//in this function we listen for updates from the server and write them to the page.
+ws.onmessage = function (evt) {
+    var array = evt.data.split(',');
+    if (array.length == 4) {
+        console.log(array);
+        $(&quot;#img&quot;).attr(&quot;src&quot;, array[0]);
+        $(&quot;#title&quot;).text(array[1]);
+        $(&quot;#artist&quot;).text(array[2]);
+        if (array[3] === 'Playing') {
+            $('#stateicon').text('pause');
+        } else {
+            $('#stateicon').text('play_arrow');
+        }
+        ws.send(&quot;Updated&quot;);
+    } else {
+        ws.send(&quot;OK.&quot;)
+    }
+};
+&lt;/script&gt;
+&lt;script&gt;
+// when the buttons are pressed, post the server
+function next() {
+    $.post('/next')
+    return false;
+}
+function previous() {
+    $.post('/previous')
+    return false;
+}
+function toggle() {
+    $.post('/toggle');
+    return false;
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+'''
+</code></pre>
+<h3 id="postreplies">Post replies</h3>
+<p>Control the music when the client POSTs the server.</p>
+<pre><code class="language-python">@post('/next')
+def next_song():
+    Playerctl.Player().next()
+
+@post('/previous')
+def next_song():
+    Playerctl.Player().previous()
+
+@post('/toggle')
+def next_song():
+    Playerctl.Player().play_pause()
+
+@post('/status')
+def is_playing():
+    return Playerctl.Player().get_property(&quot;status&quot;)
+
+@route('/static/&lt;filename:path&gt;') #This is for static files
+def send_static(filename):
+    return static_file(filename, root=os.path.dirname(os.path.realpath(' ')))
+
+run(host='0.0.0.0', port=8080) #run the server
+</code></pre>
+<h2 id="finishingup">Finishing up</h2>
+<p>Now you should have a nice music controlling start page. You can make this show as the new tab on Chrome with <a href="https://chrome.google.com/webstore/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna">this extension</a>, and on Firefox with <a href="https://addons.mozilla.org/en-US/firefox/addon/new-tab-override/">this one</a>. Just set the url to <code>0.0.0.0:8080</code>.</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--2-.gif" alt="Building a Music Controlling Python Start Page for Linux"></p>
+<p>Here I use my method to <a href="http://www.devpy.me/how-to-add-a-music-visualizer-to-your-linux-desktop/">show a music visualizer</a> on the desktop, plus <a href="http://www.devpy.me/your-guide-to-a-comfortable-linux-desktop-with-openbox/">my openbox setup</a>.</p>
+<p><a href="https://youtu.be/LY481F1r6G8">Youtube video</a></p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[How to Add a Music Visualizer to Your Linux Desktop]]></title><description><![CDATA[A great way to add some flair to your desktop is to use a music visualizer, such as cava. However, putting them on the desktop is a bit tricky.]]></description><link>https://www.devpy.me/how-to-add-a-music-visualizer-to-your-linux-desktop/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa3c</guid><category><![CDATA[themes]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Sun, 19 Feb 2017 20:34:31 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/02/ezgif.com-optimize.gif" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/02/ezgif.com-optimize.gif" alt="How to Add a Music Visualizer to Your Linux Desktop"><p>A great way to add some flair to your desktop is to use a music visualizer, such as cava. However, these visualizers usually run in a terminal, and putting them on the desktop is a bit tricky. I do it here by creating a transparent terminal on the desktop, using it as a transparent terminal wallpaper, and playing cava there.</p>
+<h2 id="installation">Installation</h2>
+<p><a href="https://github.com/karlstav/cava">Cava</a> (Console-based Audio Visualizer for ALSA) can be installed from the AUR on Arch Linux with the following:</p>
+<pre><code class="language-bash">yaourt -S cava
+</code></pre>
+<p>On Ubuntu, you can use</p>
+<pre><code class="language-bash">sudo add-apt-repository ppa:tehtotalpwnage/ppa
+sudo apt-get update
+sudo apt-get install cava
+</code></pre>
+<p>On other distros, you can <a href="https://github.com/karlstav/cava#installing-manually">install manually or use the guide</a> from cava's github.</p>
+<p>Edit <code>~/.config/cava/config</code> and set the sensitivity.</p>
+<h2 id="theeasyway">The easy way<sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></h2>
+<p><code>Tilda</code> is a versatile and powerful terminal, if not slow. On Arch, install with</p>
+<pre><code class="language-bash">sudo pacman -S tilda
+</code></pre>
+<p>On Ubuntu, use</p>
+<pre><code class="language-bash">sudo apt-get install tilda
+</code></pre>
+<p>On other distros, or if the package does not work, <a href="https://github.com/lanoxx/tilda/blob/master/HACKING.md">install from source</a>.</p>
+<p>Run Tilda. You should find a black window.</p>
+<p>To get it to our specifications, right click on the window and select preferences.</p>
+<blockquote>
+<p>Under the <em>General</em> tab, uncheck &quot;Always on Top&quot;.</p>
+</blockquote>
+<blockquote>
+<p>Under <em>Appearance</em>, make the terminal fullscreen, or ~500px high on the bottom of your desktop. Check &quot;Enable Transparency&quot; and make the &quot;Level of Transparency&quot; 100%.</p>
+</blockquote>
+<blockquote>
+<p>Under the <em>Colors</em> tab, chose &quot;Green on Black&quot; or &quot;Personalize&quot;.</p>
+</blockquote>
+<blockquote>
+<p>Under <em>Scrolling</em> you must select &quot;Disabled&quot;.</p>
+</blockquote>
+<p>At this point you should have something like this:</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-19-12-18-37.png" alt="How to Add a Music Visualizer to Your Linux Desktop"></p>
+<p>Run cava in tilda to get a desktop music visual.</p>
+<h3 id="fixingopenbox">Fixing Openbox</h3>
+<p>In Openbox, tilda will obscure other windows. Add this to your RC file:</p>
+<pre><code class="language-bash">&lt;application name=&quot;tilda&quot;&gt;  
+&lt;layer&gt;below&lt;/layer&gt;  
+&lt;/application&gt;
+</code></pre>
+<h2 id="theharderbetterway">The harder, better way</h2>
+<p>Tilda may be buggy on some systems, so you can use the terminal that comes with your desktop.</p>
+<h3 id="gnometerminal">gnome-terminal</h3>
+<p>Install <code>gnome-terminal-transparency</code> using your distro's package manager.</p>
+<p>Open gnome-terminal and add a new profile, <code>dc1</code>.</p>
+<p>Then go to preferences, remove &quot;show menubar by default&quot;, and make the terminal fully transparent.</p>
+<p>Now add the following command to startup, or add an alias:</p>
+<pre><code class="language-bash">gnome-terminal -e &quot;cava&quot; --window-with-profile=dc1 --role=dc1; sleep 0.3; wmctrl -i -r &quot;$(wmctrl -l | grep &quot;cava&quot; | tail -1 | cut -f1 -d' ')&quot; -e 10,0,594,1920,500
+</code></pre>
+<p>This starts gnome-terminal with Cava, then sets the size to cover the screen. Modify with to your screen size.</p>
+<p>Now we need to layer the gnome terminal window on the bottom.</p>
+<p>To &quot;layer&quot; windows on Unity and Gnome, we can use something called <code>Devilspie</code> and <code>wmctrl</code>.</p>
+<p>On Arch, use the following to install Devilspie:</p>
+<pre><code class="language-bash">pacman -S devilspie
+</code></pre>
+<p>On Ubuntu, use</p>
+<pre><code class="language-bash">sudo apt-get install devilspie
+</code></pre>
+<p>Now that devilspie is installed, we need to add a rule for gnome-terminal windows.</p>
+<p>Create hidden config directory for devilspie:</p>
+<pre><code class="language-bash">mkdir ~/.devilspie
+</code></pre>
+<p>Then create a config file (we use Cava because it renames the window):</p>
+<pre><code class="language-bash">nano ~/.devilspie/dc1.ds
+--------------------------
+(if
+(matches (window_role) &quot;dc1&quot;)
+(begin
+(stick)
+(below)
+(undecorate)
+(skip_pager)
+(skip_tasklist)
+(wintype &quot;dock&quot;)
+)
+)
+</code></pre>
+<p>Customize the geometry to your liking.</p>
+<p>On Openbox, this is of course easier:</p>
+<pre><code class="language-bash">&lt;application role=&quot;dc1&quot;&gt;
+  &lt;position&gt;
+    &lt;x&gt;center&lt;/x&gt;
+    &lt;y&gt;center&lt;/y&gt;
+  &lt;/position&gt;
+  &lt;maximized&gt;false&lt;/maximized&gt;
+  &lt;shade&gt;no&lt;/shade&gt;
+  &lt;layer&gt;below&lt;/layer&gt;
+  &lt;decor&gt;no&lt;/decor&gt;
+  &lt;skip_pager&gt;yes&lt;/skip_pager&gt;
+  &lt;skip_taskbar&gt;yes&lt;/skip_taskbar&gt;
+&lt;/application&gt;
+</code></pre>
+<p>You could also use xfce-terminal or gnome-terminal as an alternative to Tilda.</p>
+<h3 id="xfceterminal">xfce-terminal</h3>
+<p>Use the default xfce terminal and <code>wmctrl</code> to put it on the desktop.</p>
+<pre><code class="language-bash">#!/bin/bash
+xfce4-terminal -e &quot;cava&quot; --hide-borders --hide-toolbar --hide-menubar --title=desktopconsole --geometry=130x44+0+0 &amp;
+sleep 0.3
+wmctrl -r desktopconsole -b add,below,sticky
+wmctrl -r desktopconsole -b add,skip_taskbar,skip_pager
+</code></pre>
+<h2 id="finishingup">Finishing up</h2>
+<p>This looks pretty cool under a transparent dock, or with a fullscreen window:</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif.gif" alt="How to Add a Music Visualizer to Your Linux Desktop"></p>
+<p><a href="https://youtu.be/LY481F1r6G8">Youtube video</a></p>
+<hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p>Thank you Arch wiki for <a href="https://wiki.archlinux.org/index.php/Terminal_as_a_Transparent_Wallpaper">tilda guide</a>. <a href="#fnref1" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Your Guide to a Comfortable Linux Desktop With Openbox]]></title><description><![CDATA[Openbox is a lightweight desktop environment that is a cross between a minimal desktop and a full blown desktop, and it's powerful and comfortable to use.]]></description><link>https://www.devpy.me/your-guide-to-a-comfortable-linux-desktop-with-openbox/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa3b</guid><category><![CDATA[desktop environments]]></category><category><![CDATA[themes]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Thu, 16 Feb 2017 21:52:49 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-12-41-07.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-12-41-07.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"><p>Openbox is a lightweight linux stacking <a href="http://www.devpy.me/tag/desktops/">desktop environment</a> that is configured with files. Openbox is a cross between a completly minimal desktop such as <a href="http://www.devpy.me/your-guide-to-a-practical-linux-desktop-with-i3wm/">i3wm</a>, and a full blown desktop like <a href="http://www.devpy.me/10-of-the-best-linux-themes-compared/">GNOME</a> or KDE. This allows for a large variety of configurations, and more control for the user.</p>
+<p>Openbox is configured using 3 files: Openbox autostart, Openbox RC, and Openbox menu. (These can be found in <code>~/.config/openbox/</code>.) The autostart file controls what application are started with Openbox, the RC controls the bulk of the settings, such as the window layout, the theme, and all keyboard shortcuts, and the menu file controls the right click menu.</p>
+<p>Openbox users typically use the Tint2 panel, which is shown with my configuration in the screenshot above. However, other panels, or bars, can be used, and I have a <a href="http://www.devpy.me/your-guide-to-a-practical-linux-desktop-with-i3wm/#bars">small list of them</a> on my i3wm post. However, in this post I will only show tips about Tint2.</p>
+<h2 id="installation">Installation</h2>
+<p>If you are on Ubuntu, you can install with</p>
+<pre><code class="language-bash">sudo apt-get install openbox obconf
+</code></pre>
+<p>and switch to Openbox with the button below. (Image from howtogeek)</p>
+<img src="https://www.howtogeek.com/wp-content/uploads/2014/07/select-desktop-environment-on-ubuntu-default-login-screen-or-display-manager.png" width="400/" alt="Your Guide to a Comfortable Linux Desktop With Openbox">
+<p>On Arch linux, you can install with</p>
+<pre><code class="language-bash">sudo pacman -S openbox
+</code></pre>
+<p>And switch using your display manager or with startx.</p>
+<p>On other distros, Google it; the information should be there.</p>
+<h2 id="autostart">Autostart</h2>
+<p>This is pretty simple. Just add the commands you want to run on each line, but remember to end them with a <code>&amp;</code> so they become their own process. For example:</p>
+<pre><code class="language-bash">nitrogen --restore &amp; #restore the background chosen with nitrogen
+lxpolkit &amp; #polkit (password popup)
+clipit &amp; #a tray clipboard manager
+compton &amp; #the compositor
+tint2 &amp; #the panel
+pamac-tray &amp; #pamac software installer updates checker
+xautolock -time 15 -locker &quot;~/lock.sh&quot; -notify 30 -notifier &quot;notify-send -u critical -t 10000 -- 'Locking screen in 30 seconds'&quot; &amp; #locks screen after 30 mins
+</code></pre>
+<p>The <code>~/lock.sh</code> above is a simple script to take a screenshot, blur it, and run <code>i3lock</code> with the image. <a href="https://gist.github.com/rawsh/f391bf6aa040fcffb265237b406c5749">Here it is</a> if you're interested.</p>
+<h2 id="openboxrc">Openbox RC</h2>
+<p>This one is a tad bit more complicated. However, we will go over the basics. In most cases, the default RC should be good enough, but you can edit it to change your theme and add keyboard shortcuts.</p>
+<h3 id="themes">Themes</h3>
+<p>Openbox window themes can be changed from the RC. First, you should download a theme or two. Openbox has a list of where you can get some, or you can use <a href="https://github.com/dglava/arc-openbox">Arc-Box</a> theme which matches the Arc <a href="http://www.devpy.me/10-of-the-best-linux-themes-compared/">GTK theme</a>. This is shown in my top screenshot.</p>
+<p>The title layout controls the close/minimize/maximise buttons and the window title.</p>
+<pre><code class="language-bash">&lt;theme&gt;
+    &lt;name&gt;Arcbox&lt;/name&gt;
+    &lt;titleLayout&gt;LIMC&lt;/titleLayout&gt;
+    &lt;!--
+      available characters are NDSLIMC, each can occur at most once.
+      N: window icon
+      L: window label (AKA title).
+      I: iconify
+      M: maximize
+      C: close
+      S: shade (roll up/down)
+      D: omnipresent (on all desktops).
+    --&gt;
+    &lt;keepBorder&gt;yes&lt;/keepBorder&gt;
+    &lt;animateIconify&gt;yes&lt;/animateIconify&gt;
+&lt;/theme&gt;
+</code></pre>
+<h3 id="keyboardshortcuts">Keyboard shortcuts</h3>
+<p>I've copied the excellent cheat sheet from <a href="https://daveden.wordpress.com/2012/09/21/lubuntu-keyboard-shortcuts-cheat-sheet/">daveden's wordpress post</a> here for the defaults:</p>
+<table><tr><th>Action</th><th>Binding</th></tr><tr><td>Go to desktop (direction)</td><td>ctrl + alt + arrow</td></tr><tr><td>Go to desktop (number)</td><td>super + f1/f2/f3/f4</td></tr><tr><td>Send to desktop</td><td>shift + alt + arrow</td></tr><tr><td>Toggle show desktop</td><td>super + d</td></tr><tr><td>Close window</td><td>alt + f4</td></tr><tr><td>Hide window</td><td>alt + esc</td></tr><tr><td>Window menu</td><td>alt + space</td></tr><tr><td>Next window</td><td>alt + tab</td></tr><tr><td>Previous window</td><td>alt + shift + tab</td></tr><tr><td>Go to window (direction)</td><td>super + shift + arrow</td></tr><tr><td>Toggle fullscreen</td><td>f11</td></tr></table>
+<p>Here are a few shortcuts I like to add myself:</p>
+<pre><code class="language-text">&lt;keybind key=&quot;XF86MonBrightnessUp&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;command&gt;xbacklight +10&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+
+&lt;keybind key=&quot;XF86MonBrightnessDown&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;command&gt;xbacklight -10&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+
+&lt;keybind key=&quot;C-A-L&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;command&gt;~/lock.sh&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+
+&lt;keybind key=&quot;C-A-t&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;command&gt;termite&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+
+&lt;keybind key=&quot;XF86AudioRaiseVolume&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;command&gt;sh -c &quot;pactl set-sink-mute 0 false ; pactl set-sink-volume 0 +5%&quot;&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+
+&lt;keybind key=&quot;XF86AudioLowerVolume&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;command&gt;sh -c &quot;pactl set-sink-mute 0 false ; pactl set-sink-volume 0 -5%&quot;&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+
+&lt;keybind key=&quot;XF86AudioMute&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;command&gt;sh -c &quot;pactl set-sink-mute 0 true ; pactl set-sink-volume 0 0%&quot;&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+
+&lt;keybind key=&quot;Super_L&quot;&gt;
+  &lt;action name=&quot;Execute&quot;&gt;
+    &lt;name&gt;dmenu&lt;/name&gt;
+    &lt;command&gt;rofi -show drun -font &quot;SFNS Display 18&quot; -terminal termite&lt;/command&gt;
+  &lt;/action&gt;
+&lt;/keybind&gt;
+</code></pre>
+<p>The first two change the brightness, the rest change the volume, and the last opens rofi (a application search) on the super key. If you want to open apps with rofi as well, first download it from your distro's package manager and then copy <a href="http://s.devpy.me/devpyxresources">my config</a> to your <code>.Xresources</code> for the arc colors:</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/c3906.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"></p>
+<p>You can switch tabs in rofi with <kbd>Shift+Arrow Keys</kbd>. This is my current and favorite config for rofi, and it matches pretty well with the Arc theme, but many others can be found on /r/unixporn.</p>
+<h2 id="openboxmenu">Openbox Menu</h2>
+<p>The menu also uses xml for config. You can generate this dynamically or statically to get a list of applications in categories like the picture below using <a href="https://github.com/trizen/obmenu-generator">obmenu-generator</a>.</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/rsz_screenshot_from_2017-02-16_14-27-02.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"></p>
+<p>To get this, install obmenu generator and edit your menu file. It should look like this (the <code>-i</code> adds icons):</p>
+<pre><code class="language-bash">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;openbox_menu xmlns=&quot;http://openbox.org/&quot;
+ xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+  xsi:schemaLocation=&quot;http://openbox.org/&quot;&gt;
+    &lt;menu id=&quot;root-menu&quot; label=&quot;obmenu-generator&quot; execute=&quot;/usr/bin/perl /usr/bin/obmenu-generator -i&quot; /&gt;
+&lt;/openbox_menu&gt;
+</code></pre>
+<p>If you prefer to customize the menu or use a faster static version (will not update when you install new apps) you can run <code>obmenu-generator</code> and customize the output.</p>
+<h2 id="guisettings">GUI settings</h2>
+<p>If you're more of a graphical person, <code>Obconf</code> has you covered. This should have been installed with Openbox. Obconf can change most things in the RC file, but not autostart or keyboard shortcuts.</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-14-39-15.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"></p>
+<h2 id="matchingchrome">Matching Chrome</h2>
+<p>If you would like to match Chrome to Arcbox colors, you can use the colors <code>#2F343F</code> and <code>#404552</code>.</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-15-22-13.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"></p>
+<p><a href="https://u.teknik.io/prMgV.crx">Here is the Chrome theme I made</a> (crx file).</p>
+<p>I am using a chrome extension I made (<a href="https://startclean.github.io/">Start Clean New Tab Page</a>: <a href="https://chrome.google.com/webstore/detail/start-clean-new-tab-page/oaaiopdkhehimlfmjjljfaaofohdpogd?hl=en-US">with search</a>, <a href="https://chrome.google.com/webstore/detail/start-clean-new-tab-page/hcpnfohelmaeaggdaechndhkpcednefi">without search</a>).</p>
+<h2 id="tint2">Tint2</h2>
+<p><img src="https://www.devpy.me/content/images/2017/02/rsz_1screenshot_from_2017-02-16_12-39-39.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"></p>
+<p>Tint2 can be configured with <code>Tint2conf</code> which is installed with Tint2. If you would like my config, you can edit <code>~/.config/tint2/tint2rc</code> with the <a href="https://gist.github.com/rawsh/8257aae103508ba5ce4577b326c9a641">contents of my gist</a>.</p>
+<p>The small black square shows that there is no music playing. The music indicator is powered by <code>spotify-now</code>. Here is the command:</p>
+<pre><code class="language-bash">{ echo &quot;$(spotify-now -i &quot; &lt;b&gt;%title&quot; -e &quot;&lt;b&gt;&quot; -p &quot; paused&lt;b&gt;&quot; | awk -v len=40 '{ if (length($0) &gt; len) print substr($0, 1, len-3) &quot;...&quot;; else print; }' | tr -d '&amp;' | awk '{print $0 &quot;&lt;/b&gt;&quot;}')&quot;; echo &quot;$(spotify-now -i '%artist' -p ' ' -e ' ')&quot;; } | tr &quot;\n&quot; &quot; &quot;
+</code></pre>
+<p>The font awesome font should be installed for the same look. Here is what music playing looks like (long titles are shortened with ellipses, use pango markup with an executor in tint2):</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-14-52-43.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"></p>
+<p>There are many more great Tint2 themes, a great place to look is /r/unixporn (again).</p>
+<h2 id="finishingup">Finishing up</h2>
+<p>I hope you like Openbox! If you want more info, the <a href="https://wiki.archlinux.org/index.php/openbox">Arch Wiki page on Openbox</a> is a great resource.</p>
+<p><a href="http://openbox.org/wiki/Main_Page">The Openbox website</a></p>
+<p>Here is my current screenshot (wall is <a href="https://www.artstation.com/artwork/JBbxd">snow peaks by Luan Nguyen</a>):</p>
+<p><a href="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-15-05-29.png"><img src="https://www.devpy.me/content/images/2017/02/Screenshot-from-2017-02-16-15-05-29.png" alt="Your Guide to a Comfortable Linux Desktop With Openbox"><br>
+</a></p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Robert's Rices 2016]]></title><description><![CDATA[Last year, I got into linux "ricing", which means customization of your desktop. Over the course of 2016, I made several configs, and here they are.]]></description><link>https://www.devpy.me/roberts-rices-2016/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa39</guid><category><![CDATA[themes]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Wed, 18 Jan 2017 06:01:03 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-32-04.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-32-04.png" alt="Robert's Rices 2016"><p>Last year, I got into Linux &quot;ricing&quot;, which means customization of your desktop. Over the course of 2016, I made several configs, and I would like to share a few of my favorites with you.</p>
+<h1 id="gnomeminimalpanel">[GNOME] Minimal Panel</h1>
+<p><a href="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-44-14.png"><img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-44-14.png" alt="Robert's Rices 2016"></a><br>
+<a href="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-43-09.png"><img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-43-09.png" alt="Robert's Rices 2016"></a><br>
+<a href="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-44-35.png"><img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-44-35.png" alt="Robert's Rices 2016"></a></p>
+<p>GNOME 3.2 with all my icons in the panel.</p>
+<ul>
+<li><strong>Icons</strong>: Papirus Icons</li>
+<li><strong>Gtk</strong>: Arc-Darker</li>
+<li><strong>Firefox</strong>: Arc-Darker Firefox theme</li>
+<li><strong>Wallpaper</strong>: <a href="http://i.imgur.com/nuiDnnu.jpg">Unsplash</a></li>
+</ul>
+<p>I am using a fork of the MMOD panel gnome extension. <a href="https://github.com/justinnichols/mmod-panel">Download the extension</a>, then add it to <code>~/.local/share/gnome-shell/extensions/</code>. If you use GNOME 2.20 or later, run <code>gnome-shell --version</code> and add your version to the extension's <code>metadata.json</code>.</p>
+<h1 id="openboxsunset">[Openbox] Sunset</h1>
+<p><a href="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-22-55-34.png"><br>
+<img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-22-55-34.png" alt="Robert's Rices 2016"></a><br>
+<a href="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-22-55-02-1.png"><img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-22-55-02-1.png" alt="Robert's Rices 2016"></a><br>
+<a href="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-22-54-31.png"><img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-22-54-31.png" alt="Robert's Rices 2016"></a><br>
+<a href="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-35-20.png"><img src="https://www.devpy.me/content/images/2017/01/Screenshot-from-2017-01-17-23-35-20.png" alt="Robert's Rices 2016"></a></p>
+<p>My most recent, and overall favorite rice.</p>
+<ul>
+<li><strong>Icons</strong>: Modified Paper Icons</li>
+<li><strong>Gtk</strong>: Modified Arc-Dark</li>
+<li><strong>Window theme</strong>: Custom (OB-DevPy)</li>
+<li><strong>Firefox</strong>: Arc-Darker Firefox theme with <a href="https://gist.github.com/rawsh/7e613744bfff64fb052f52930b2f752a">this added css</a>.</li>
+<li><strong>Lock</strong>: xwobf with i3lock-colors</li>
+<li><strong>Wallpaper</strong>: <a href="https://unsplash.com/?photo=JgOeRuGD_Y4">Unsplash</a></li>
+</ul>
+<p>Installation:</p>
+<ol>
+<li>Download <a href="https://github.com/snwh/paper-icon-theme">Paper Icon Theme</a> then run <a href="https://gist.github.com/rawsh/fd87ead54d5f829f3a8d26baa7206077">this script</a> in the <code>[Extracted Paper]/Paper</code> folder. Then move the icons to <code>~/.icons/</code>.</li>
+<li>Download the <a href="https://github.com/devpytech/arc-devpy-red">Arc-DevPy-Red Theme</a> from github and extract it to <code>~/.themes/</code>.</li>
+<li>Download the <a href="https://github.com/devpytech/ob-devpy-red">Ob-DevPy-Red Theme</a> from github and extract it to <code>~/.themes/</code>.</li>
+<li>Download and replace your <code>~/.config/tint2/tint2rc</code> file with <a href="https://gist.github.com/rawsh/8257aae103508ba5ce4577b326c9a641">mine</a>.</li>
+<li>Replace your <code>~/.Xresources</code> with <a href="https://gist.github.com/rawsh/9ae04a2bdbfce513ad0851d9277515d2">my file</a>.</li>
+</ol>
+<h1 id="cinnimonsimpletiled">[Cinnimon] Simple tiled</h1>
+<p><a href="https://i.redditmedia.com/vpGoyEO3sPHCVf6btU2bwc6vC8J9ySYNGH9uBlz0eEc.png?w=1024&amp;s=8535017d8f3f3f218979831627c5bb1e"><img src="https://i.redditmedia.com/vpGoyEO3sPHCVf6btU2bwc6vC8J9ySYNGH9uBlz0eEc.png?w=1024&amp;s=8535017d8f3f3f218979831627c5bb1e" alt="Robert's Rices 2016"></a></p>
+<p><a href="http://i.imgur.com/QELjav0.jpg"><img src="http://i.imgur.com/QELjav0.jpg" alt="Robert's Rices 2016"></a></p>
+<p><a href="http://i.imgur.com/VKtHrxQ.jpg"><img src="http://i.imgur.com/VKtHrxQ.jpg" alt="Robert's Rices 2016"></a></p>
+<ul>
+<li><strong>Distro:</strong> Arch</li>
+<li><strong>Desktop:</strong> Cinnamon</li>
+<li><strong>Extension:</strong> Gtile</li>
+<li><strong>Applet:</strong> Icing task manager (fork of window task manager)</li>
+<li>More info in screenfetch</li>
+</ul>
+<p>If you would like to see cool rices <a href="https://www.reddit.com/r/unixporn/">/r/unixporn</a> is the way to go.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[Your Guide to a Practical Linux Desktop With i3WM]]></title><description><![CDATA[i3WM is not a traditional desktop environment, such as Unity or Gnome. Instead, it is only a window manager, and it's pretty cool.]]></description><link>https://www.devpy.me/your-guide-to-a-practical-linux-desktop-with-i3wm/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa35</guid><category><![CDATA[desktop environments]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Tue, 29 Nov 2016 01:00:04 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2016/11/Screenshot_2016-11-28_17-03-37.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2016/11/Screenshot_2016-11-28_17-03-37.png" alt="Your Guide to a Practical Linux Desktop With i3WM"><p>Technically, what you see in my screenshot above is not really i3. The distance between the windows and the screen edges is from a fork of i3, dubbed i3-gaps, created by <a href="https://github.com/Airblader">Ingo Bürk</a>. Also, the bar is an alternative to i3bar, which I will go over later in the list of bars for i3.</p>
+<p>i3WM is not a traditional desktop environment, such as Unity or Gnome. Instead, it is only a window manager, and it's only purpose is to control the layout of your screen. i3 is not recommended for beginners to Linux, as all the configuration you do is in text files, with almost no gui.</p>
+<p>You have two major choices for configuration in i3. You can have the files in a dot folder (such as /home/user/.i3/) or in the .config folder (/home/user/.config/i3/). It does not really matter which you use, but in this guide I will be referring to the .config approach.</p>
+<h2 id="installing">Installing</h2>
+<p>If your distro is not listed, look it up. You should be able to find instructions easily.</p>
+<h3 id="arch">Arch</h3>
+<pre><code class="language-bash">sudo pacman -S i3
+</code></pre>
+<h3 id="ubuntu">Ubuntu</h3>
+<p><a href="http://walther.io/how-to-replace-unity-with-i3-window-manager-on-ubuntu-1204/">source</a></p>
+<pre><code class="language-bash"># login to the root shell for one 'echo' command
+sudo -i
+echo &quot;deb http://debian.sur5r.net/i3/ $(lsb_release -c -s) universe&quot; &gt;&gt; /etc/apt/sources.list
+logout
+# we've returned to our user account
+sudo apt-get update
+sudo apt-get --allow-unauthenticated install sur5r-keyring
+sudo apt-get update
+sudo apt-get install i3
+</code></pre>
+<h3 id="fedora">Fedora</h3>
+<p><a href="https://fedoramagazine.org/getting-started-i3-window-manager/">source</a></p>
+<pre><code class="language-bash">sudo dnf install i3 i3status dmenu i3lock
+</code></pre>
+<p>If you are using Arch, the easiest way to get to i3 is with a session manager.<br>
+I reccomend <a href="https://wiki.archlinux.org/index.php/LightDM">lightdm</a>, which can be installed from the aur with</p>
+<pre><code class="language-bash">yaourt -S lightdm-webkit-greeter
+</code></pre>
+<p>When you install i3, it gives you a choice of using the defaults or setting it up yourself. If you are a beginner, I recommend using the defaults, which includes a <strong>mod key</strong> of <kbd>Alt</kbd>. You use the mod key in several keyboard shortcuts, such as when you move windows or resize them.</p>
+<h2 id="usingi3">Using i3</h2>
+<p>Here are the keyboard command to use i3. They might seem complicated and hard to use at first, but with time they become second nature. When I was using Ubuntu on my friends laptop, I found myself tapping <kbd>Alt + Enter</kbd> for a terminal. Remember, if you stuck with the defaults, <kbd>Mod</kbd> is <kbd>Alt</kbd>.</p>
+<p><strong><kbd>Mod + Enter</kbd></strong></p>
+<p>This opens a terminal.</p>
+<p><strong><kbd>Mod + Arrow Keys</kbd></strong></p>
+<p>This selects a window, kind of like Alt Tab.</p>
+<p><strong><kbd>Mod + Shift + Arrow Keys</kbd></strong></p>
+<p>This moves the selected window.</p>
+<p><strong><kbd>Mod + Shift + Space</kbd></strong></p>
+<p>This floats the window. Move with <kbd>Alt drag</kbd>, resize with <kbd>Alt right click drag</kbd>.</p>
+<p><strong><kbd>Mod + R</kbd></strong></p>
+<p>This enters resize mode. Resize using the arrow keys, exit with <kbd>Enter</kbd>.</p>
+<p>Another useful method to resize windows is <kbd>Alt + right click drag</kbd>.</p>
+<p><strong><kbd>Mod + H</kbd></strong></p>
+<p>This sets the layout mode to horizontal. New windows tile left and right.</p>
+<p><strong><kbd>Mod + V</kbd></strong></p>
+<p>This sets the layout mode to vertical. New windows tile up and down.</p>
+<p><strong><kbd>Mod + W</kbd></strong></p>
+<p>This sets the layout mode to tabs. New windows are tabbed.</p>
+<p><strong><kbd>Mod + S</kbd></strong></p>
+<p>This sets the layout mode to stacked. New windows are stacked.</p>
+<h2 id="configuring">Configuring</h2>
+<p><code>.config/i3/config</code> is the file that controls the window manager. Here, you define startup applications, custom keyboard shortcuts, and layout rules. If you use i3bar, this is where you configure it.</p>
+<h3 id="usefulsnippets">Useful snippets</h3>
+<p>Place these at the end of the file (<code>.config/i3/config</code>). Exec means run command.</p>
+<p>Set a background with <a href="https://wiki.archlinux.org/index.php/feh">feh</a></p>
+<pre><code class="language-bash">exec feh --bg-scale /path/to/your/image.png
+</code></pre>
+<p>Restore set background (chosen with gui) using <a href="https://wiki.archlinux.org/index.php/nitrogen">nitrogen</a></p>
+<pre><code class="language-bash">exec nitrogen --restore
+</code></pre>
+<p>Start <a href="https://wiki.archlinux.org/index.php/Compton">compton</a> for window effects</p>
+<pre><code class="language-bash">exec --no-startup-id compton
+</code></pre>
+<p>Open dmenu desktop (application search) with the super key</p>
+<pre><code class="language-bash">bindsym Super_L exec i3-dmenu-desktop
+</code></pre>
+<p>Lock the screen with <kbd>Control+Alt+L</kbd></p>
+<pre><code class="language-bash">bindsym Control+Mod1+l exec i3lock
+</code></pre>
+<p>Bind your audio keyboard keys to change volume and pause/play</p>
+<pre><code class="language-bash">bindsym XF86AudioRaiseVolume exec amixer -q set Master 5%+ unmute
+bindsym XF86AudioLowerVolume exec amixer -q set Master 5%- unmute
+bindsym XF86AudioMute exec amixer -q set Master mute
+bindsym XF86AudioPlay exec playerctl play-pause
+bindsym XF86AudioNext exec playerctl next
+bindsym XF86AudioPrev exec playerctl previous
+</code></pre>
+<h3 id="gtk">GTK</h3>
+<p>You can change gtk settings with <a href="https://wiki.lxde.org/en/LXAppearance">lxappearance</a>. If you need to choose a theme, check out <a href="http://www.devpy.me/10-of-the-best-linux-themes-compared/">my article on the best linux themes</a>.</p>
+<h2 id="bars">Bars</h2>
+<p>Bars are what you use to see info on your system, and in some cases launch apps and change settings. The default bar is i3bar with i3status, so that is not included here. If you want the same look as the screenshots, the files are linked.</p>
+<h3 id="lemonbar">Lemonbar</h3>
+<p><img src="http://i.imgur.com/ZSo85b2.png" alt="Your Guide to a Practical Linux Desktop With i3WM"><br>
+Lemonbar is very configurable and is probably the most popular solution, but <s>has no clickable areas</s>. To get this look, install <a href="https://wiki.archlinux.org/index.php/Lemonbar">lemonbar</a>, and download <a href="https://github.com/CopperBadger/dotfiles/tree/master/dots/.i3/lemonbar-new">the dots</a>.</p>
+<p>To run lemonbar on startup, add</p>
+<pre><code class="language-bash">exec /path/to/i3_lemonbar.sh
+</code></pre>
+<p>to your <code>.config/i3/config</code> file.</p>
+<h3 id="yabar">Yabar</h3>
+<p><img src="https://www.devpy.me/content/images/2016/11/Screenshot_2016-11-28_17-46-36.png" alt="Your Guide to a Practical Linux Desktop With i3WM"><br>
+This is my custom config for yabar, a simple bar from /u/geommer. Open the image in a new tab, because it looks small on the website. To get this config, install <a href="https://github.com/geommer/yabar">yabar</a> and edit <code>.config/yabar/yabar.conf</code> with the <a href="https://gist.github.com/rawsh/3ec0fe14607f7e6dc9fa48ad7693aad6">contents of my gist</a>.</p>
+<p>To run yabar on startup, add</p>
+<pre><code class="language-bash">exec --no-startup-id yabar
+</code></pre>
+<p>to your <code>.config/i3/config</code> file.</p>
+<h3 id="xfce4panel">XFCE4 Panel</h3>
+<p><img src="https://www.devpy.me/content/images/2016/11/Screenshot_2016-11-28_18-49-55.png" alt="Your Guide to a Practical Linux Desktop With i3WM"><br>
+<a href="http://docs.xfce.org/xfce/xfce4-panel/start">Xfce4 panel</a> can be run on i3, and it looks pretty good. This is a good option if you want a GUI config.</p>
+<p>To run it on startup, add</p>
+<pre><code class="language-bash">exec --no-startup-id xfce4-panel --disable-wm-check
+</code></pre>
+<p>to your <code>.config/i3/config</code> file.</p>
+<h3 id="positronbar">Positron Bar</h3>
+<p><img src="https://github.com/ElessarWebb/positron-bar/raw/master/docs/screenshots/april.png" alt="Your Guide to a Practical Linux Desktop With i3WM"><br>
+<a href="https://github.com/ElessarWebb/positron-bar">Positron bar</a> is another alternative to i3bar, with the clickability that <s>lemonbar</s> and yabar lack. It is powered by Node.js and styled with css. Follow the instructions in the <a href="https://github.com/ElessarWebb/positron-bar">git repo</a> to install it.</p>
+<h2 id="wrapup">Wrapup</h2>
+<p>Have fun with i3! You can do <a href="http://www.devpy.me/content/images/2016/11/Screenshot_2016-11-28_18-58-45.png">some pretty cool stuff</a> with it.</p>
+<p><img src="https://www.devpy.me/content/images/2016/11/Screenshot_2016-11-28_18-58-45.png" alt="Your Guide to a Practical Linux Desktop With i3WM"></p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[The ThinkPad E570: Fast Linux Laptop at a Low Price]]></title><description><![CDATA[ThinkPads are known to be stable and great for running linux on. This Cyber weekend, Lenovo has large deals on their laptops, and the E570 is included.]]></description><link>https://www.devpy.me/the-thinkpad-e570-fast-linux-laptop-at-a-low-price/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa37</guid><category><![CDATA[open source news]]></category><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Mon, 28 Nov 2016 05:36:30 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2016/11/05_thinkpad_e570_hero_shot_front_lid_closing.jpg" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2016/11/05_thinkpad_e570_hero_shot_front_lid_closing.jpg" alt="The ThinkPad E570: Fast Linux Laptop at a Low Price"><p><strong>Update 03/03/17:</strong> These are back up as the <a href="http://amzn.to/2xOTNkq">E575 with AMD instead of Intel cores</a>.</p>
+<p><s><strong>Update 12/09/16:</strong> These have sold out as of now.</s></p>
+<hr>
+<p>I have been using mine for 6 months now it's still great; running Arch linux with tlp gets me 7 hours of battery (on medium brightness). I replaced my hard drive with the Samsung 960 Evo SSD, which I would recommend buying instead of their SSD (the EVO I bought is 250 gigs for 130$ and the thinkpad version is 256 gigs for 230$).</p>
+<p>The one quirk I have with this laptop is that the material it's made from is smear attractive.</p>
+<p>The back of my laptop is now a smudgy mess. Oh well.</p>
+<hr>
+<p>ThinkPads are known to be stable and great for running Linux on. This Cyber weekend, Lenovo has large deals on their laptops, and the <a href="http://amzn.to/2zkkbi6">E570, a brand new Laptop from Lenovo</a>, is included. At the lowest end configuration, the <a href="http://amzn.to/2zkkbi6">E570</a> has the i3 processor, 1366p display, and 4 gigabytes of RAM for $450 (normally $600).</p>
+<p>I bought one of these for myself on Friday at the highest end configuration, with the i7 3.5Ghz processor, 16gb of RAM, and a 1080p display for $720 (normally $960). The laptop has a slightly bulky design, but overall, it looks quite nice.</p>
+<p><img src="https://www.devpy.me/content/images/2017/10/Feature-2.png" alt="The ThinkPad E570: Fast Linux Laptop at a Low Price"></p>
+<p>Sadly, Lenovo has still not started shipping laptops with Linux installed, but you can always use your installation disk before booting up Windows.</p>
+<!--kg-card-end: markdown-->]]></content:encoded></item><item><title><![CDATA[2016's Best Gifts for Geeks: Ten of the Best]]></title><description><![CDATA[Innovation is increasing at amazing rates, and new products and software is popping up at every corner.  Here's ten awesome innovations for this Christmas.]]></description><link>https://www.devpy.me/2016s-best-gifts-for-geeks-ten-of-the-best/</link><guid isPermaLink="false">5e8ea92ff8627a7a760daa36</guid><dc:creator><![CDATA[Robert Washbourne]]></dc:creator><pubDate>Fri, 25 Nov 2016 01:31:43 GMT</pubDate><media:content url="https://www.devpy.me/content/images/2016/11/2016-Gifts-For-Geeks--1-.png" medium="image"/><content:encoded><![CDATA[<!--kg-card-begin: markdown--><img src="https://www.devpy.me/content/images/2016/11/2016-Gifts-For-Geeks--1-.png" alt="2016's Best Gifts for Geeks: Ten of the Best"><p>Innovation is increasing at amazing rates, and new products and software are popping up at every corner. In the last ten years, geek things like Linux and Android have become mainstream, the superior quality of open source software changing the tech market. <sup class="footnote-ref"><a href="#fn1" id="fnref1">[1]</a></sup></p>
+<p>This year we've seen boards like C.H.I.P and Pi Zero offer computing at ridiculously low prices<sup class="footnote-ref"><a href="#fn1" id="fnref1:1">[1:1]</a></sup>, and Ubuntu 16.10 brought Unity 8 with promising convergence<sup class="footnote-ref"><a href="#fn1" id="fnref1:2">[1:2]</a></sup>.</p>
+<p>Here are some of my favorite gifts this year, with boards, drones, and more.</p>
+<p>Note: These are in rough order of price, from low to high.<br>
+Note 2: Black Friday deals will probably drop these prices, and I will try to update, but keep in mind that the prices here may be inaccurate. Leaving a comment with the better price would be very helpful.</p>
+<p><a target="_blank" href="http://amzn.to/2yTCKhb"><h2>Google Cardboard Kit (Jet Black) - 11$</h2></a></p>
+<p><img src="http://bestelectronicsgift.com/wp-content/uploads/2015/12/EightOnes-VR-Kit-The-Complete-Google-Cardboard-Kit-with-Head-strap-NFC-365-day-Warranty-and-Video-Instructions-Jet-Black-0-4.jpg" alt="2016's Best Gifts for Geeks: Ten of the Best"></p>
+<p>The Google cardboard is a great way to get into VR. Anybody with a phone can use it, and the cheap price makes it accessible for everyone.</p>
+<ul>
+<li>The jet black style of EightOnes looks better than plain cardboard</li>
+<li>The Google cardboard is awesome with a FPV drone, like the <a href="#parrotar">Parrot AR</a></li>
+<li><a href="https://play.google.com/store/apps/details?id=com.google.samples.apps.cardboarddemo&amp;hl=en">The app</a> comes with 100's of virtual reality games and experiences.</li>
+</ul>
+<p><a target="_blank" href="http://amzn.to/2kYTI7r"><h2>Estes Proto X Nano - 33$</h2></a></p>
+<p><img src="http://d2rormqr1qwzpz.cloudfront.net/photos/2014/10/22/70454-protox_b.jpg" alt="2016's Best Gifts for Geeks: Ten of the Best"></p>
+<p>The Proto X nano is a tiny drone that flies surprisingly well. It is a great drone to learn to fly on, and has beginner and advanced control modes.</p>
+<ul>
+<li>More of an indoor toy; as one would expect, not great in wind</li>
+<li>Gyros keep it upright</li>
+<li><a href="http://www.protoquad.com/gallery.html">Lots of colors!</a></li>
+</ul>
+<p>This is a good beginner - to mid range drone that is fun to fly and fairly cheap.</p>
+<p><a target="_blank" href="https://store.google.com/product/chromecast_2015"><h2>Chromecast - 35$</h2></a></p>
+<p><img src="https://pmcvariety.files.wordpress.com/2015/11/chromecast.jpg?w=1000&amp;h=562&amp;crop=1" alt="2016's Best Gifts for Geeks: Ten of the Best"></p>
+<p>Chromecast makes streaming easy with this tiny hdmi device. You can control it with a phone or a chrome extension<sup class="footnote-ref"><a href="#fn1" id="fnref1:3">[1:3]</a></sup>.</p>
+<ul>
+<li>Streamed from the cloud, so proximity doesn't matter</li>
+<li>A whole bunch of apps to stream from</li>
+<li>Easy to use and low requirements: A TV and a place to plug it in.</li>
+<li>You get HBO now for 3 months when you purchase.</li>
+</ul>
+<p><a target="_blank" href="http://amzn.to/2zyGEZR"><h2>Raspberry Pi 3 Model B - 35$</h2></a><br>
+<img src="https://www.raspberrypi.org/wp-content/uploads/2016/03/pi3.jpg" alt="2016's Best Gifts for Geeks: Ten of the Best"><br>
+The new Raspberry Pi is much improved:</p>
+<ul>
+<li>1.2GHz 64-bit quad-core ARMv8 CPU<sup class="footnote-ref"><a href="#fn1" id="fnref1:4">[1:4]</a></sup></li>
+<li>Built-in wireless card</li>
+<li>Bluetooth and BLE</li>
+<li>Hackable as ever.</li>
+</ul>
+<p>This cheap Linux board will make anyone happy; my 12 year old little brother loves his.</p>
+<p><a target="_blank" href="http://amzn.to/2kXx1AF"><h2>Echo Dot (2nd Generation) - 40$</h2></a></p>
+<p><img src="http://cdn.bgr.com/2016/03/amazon-echo-dot.png" alt="2016's Best Gifts for Geeks: Ten of the Best"><br>
+The Echo Dot is a smaller, cheaper version of Amazon Echo that does not require you to own an Echo. This alternative packs a smaller speaker, but can be attached to your existing sound system.</p>
+<ul>
+<li>Amazon Alexa answering service</li>
+<li>Hackable, with open source addons called &quot;skills&quot;</li>
+<li>Integrates with smart appliances.</li>
+</ul>
+<p>The Echo Dot is cheap enough to get one for every room, but still very powerful and useful.</p>
+<p><a target="_blank" href="http://amzn.to/2zkJEIl"><h2>Chromebit - 82$</h2></a><br>
+<img src="https://images-na.ssl-images-amazon.com/images/I/71AZqXbqp8L._SL1500_.jpg" alt="2016's Best Gifts for Geeks: Ten of the Best"></p>
+<p>Chromebit is Linux in your pocket, and no: it's not your Android phone. Chromebit puts Google's Chrome OS on a usb drive sized device, which similarly to the Chromecast, plugs in via hdmi to a monitor or TV.</p>
+<ul>
+<li>Basically a Chromebook</li>
+<li>Get <a href="http://lifehacker.com/how-to-install-linux-on-a-chromebook-and-unlock-its-ful-509039343">Linux on your TV</a></li>
+<li><a href="https://www.asus.com/us/Chrome-Devices/Chromebit-CS10/">Free 100gb Google Drive space!</a></li>
+</ul>
+<p><a target="_blank" href="http://amzn.to/2gQkcDG"><h2>NVIDIA Jetson TK1 Development Kit - 199$</h2></a><br>
+<img src="https://geizhals.at/p/1108516.jpg?width=450" alt="2016's Best Gifts for Geeks: Ten of the Best"><br>
+The NVIDIA Jetson tk1 can be thought of as the older brother of the Raspberry Pi. It sports a CUDA core for every dollar of it's price, and is perfect for machine learning or computer vision projects. I've had a lot of fun with mine.</p>
+<ul>
+<li><a href="http://elinux.org/Jetson_TK1#Projects_using_Jetson_TK1">Lots of cool projects you can do with it</a></li>
+<li><a href="http://elinux.org/Jetson/Kodi_(XBMC)">[Under]use it as a home media center</a></li>
+<li><a href="http://elinux.org/Jetson_TK1#Hardware_Features">Did I mention 192 CUDA cores?</a></li>
+<li>Did I mention it comes with Linux?</li>
+</ul>
+<p>It might not be cheap, but it is powerful.</p>
+<p><a target="_blank" href="http://amzn.to/2yxw3Qu"><h2>Parrot AR Drone 2.0 Elite Edition - 199$</h2></a><br>
+<img src="https://images-na.ssl-images-amazon.com/images/I/717uFvvIfmL._SL1500_.jpg" alt="2016's Best Gifts for Geeks: Ten of the Best"></p>
+<p>This easy to fly drone can:</p>
+<ul>
+<li>Stream 720p video to your phone or tablet</li>
+<li>Be controlled by touch or <a href="http://blog.parrot.com/2013/06/10/nvidiashield610feet/">with the nvidia shield (up to 610 feet range!)</a></li>
+<li>Be modded easily</li>
+<li>Be hacked to <a href="https://youtu.be/2Ak1ch_dq6U">dance to music</a>, or whatever else you can dream up.</li>
+</ul>
+<p>All in all this is a fun, hackable drone that anyone will enjoy.</p>
+<p><a target="_blank" href="http://amzn.to/2ywYfCZ"><h2>Samsung Gear S2 - 225$</h2></a><br>
+<img src="http://www.samsung.com/uk/gear-s2/common/promotions/galaxy/gears2/features/gears2_sHealth.jpg" alt="2016's Best Gifts for Geeks: Ten of the Best"><br>
+This curvy smartwatch made by Samsung is a great gift for a watch lover.</p>
+<ul>
+<li>Lots of apps</li>
+<li>Can run Android</li>
+<li><a href="http://www.samsung.com/levant/galaxy/gear-s2/features/">Rotating bezel</a> is pretty awesome.</li>
+</ul>
+<p><a target="_blank" href="http://amzn.to/2zjPxWr"><h2>Kano Computer Kit with Screen - 300$</h2></a><br>
+<img src="https://i.ytimg.com/vi/SDXW5sd6DwY/maxresdefault.jpg" alt="2016's Best Gifts for Geeks: Ten of the Best"></p>
+<p>This computer kit is fun for both kids and adults. One reviewer said:</p>
+<blockquote>
+<p>I was given Kano as a gift - as a middle aged female adult. As soon as I opened the kit I got so excited to assemble. Once I assembled and plugged it in I felt like my 11 year old self figuring out how and copying computer code to make games on my Commodore 64.</p>
+</blockquote>
+<p><a href="https://www.amazon.com/review/RARDI24SXFN7M/">Amazon review</a></p>
+<ul>
+<li>Learn to put together a computer</li>
+<li>Learn the Linux terminal through games</li>
+<li>Comes with a bunch of [educational-ish] apps.</li>
+</ul>
+<p>Story based Linux learning = pretty awesome gift.<br>
+Note: You can get a cheaper version without the screen for <a target="_blank" href="http://amzn.to/2yvVvEg">150$.</a></p>
+<hr>
+<style>
+h2 > a {
+color: white;
+}
+</style><hr class="footnotes-sep">
+<section class="footnotes">
+<ol class="footnotes-list">
+<li id="fn1" class="footnote-item"><p><a href="https://www.raspberrypi.org/products/raspberry-pi-3-model-b/">Raspberry Pi 3 stats</a> <a href="#fnref1" class="footnote-backref">↩︎</a> <a href="#fnref1:1" class="footnote-backref">↩︎</a> <a href="#fnref1:2" class="footnote-backref">↩︎</a> <a href="#fnref1:3" class="footnote-backref">↩︎</a> <a href="#fnref1:4" class="footnote-backref">↩︎</a></p>
+</li>
+</ol>
+</section>
+<!--kg-card-end: markdown-->]]></content:encoded></item></channel></rss>

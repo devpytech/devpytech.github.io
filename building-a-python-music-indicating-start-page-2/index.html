@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Building a Music Controlling Python Start Page for Linux</title>
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicons/apple-touch-icon-57x57.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="60x60" href="/assets/favicons/apple-touch-icon-60x60.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="72x72" href="/assets/favicons/apple-touch-icon-72x72.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/favicons/apple-touch-icon-76x76.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="114x114" href="/assets/favicons/apple-touch-icon-114x114.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="120x120" href="/assets/favicons/apple-touch-icon-120x120.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="144x144" href="/assets/favicons/apple-touch-icon-144x144.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/favicons/apple-touch-icon-152x152.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon-180x180.png?v=f5980b8f9c">
+    <link rel="icon" type="image/png" href="/assets/favicons/favicon-32x32.png?v=f5980b8f9c" sizes="32x32">
+    <link rel="icon" type="image/png" href="/assets/favicons/android-chrome-192x192.png?v=f5980b8f9c" sizes="192x192">
+    <link rel="icon" type="image/png" href="/assets/favicons/favicon-96x96.png?v=f5980b8f9c" sizes="96x96">
+    <link rel="icon" type="image/png" href="/assets/favicons/favicon-16x16.png?v=f5980b8f9c" sizes="16x16">
+    <link rel="manifest" href="/assets/favicons/manifest.json?v=f5980b8f9c">
+    <link rel="mask-icon" href="/assets/favicons/safari-pinned-tab.svg?v=f5980b8f9c" color="#c64842">
+    <link rel="shortcut icon" href="/favicon.png">
+    <meta name="msapplication-TileColor" content="#c64842'}}">
+    <meta name="msapplication-TileImage" content="/assets/favicons/mstile-144x144.png?v=f5980b8f9c">
+    <meta name="msappliandcation-config" content="/assets/favicons/browserconfig.xml?v=f5980b8f9c">
+    <meta name="theme-color" content="#c64842">
+		
+    <meta name="description" content="By bundling Playerctl with Bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage." />
+    <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+    <link rel="canonical" href="https://www.devpy.me/building-a-python-music-indicating-start-page-2/" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <link rel="amphtml" href="https://www.devpy.me/building-a-python-music-indicating-start-page-2/amp/" />
+    
+    <meta property="og:site_name" content="DevPy" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Building a Music Controlling Python Start Page for Linux" />
+    <meta property="og:description" content="By bundling Playerctl with Bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage." />
+    <meta property="og:url" content="https://www.devpy.me/building-a-python-music-indicating-start-page-2/" />
+    <meta property="og:image" content="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif" />
+    <meta property="article:published_time" content="2017-02-21T18:44:16.000Z" />
+    <meta property="article:modified_time" content="2017-09-05T20:48:45.000Z" />
+    <meta property="article:tag" content="programming" />
+    <meta property="article:tag" content="themes" />
+    <meta property="article:tag" content="python" />
+    
+    <meta property="article:publisher" content="https://www.facebook.com/devpytech" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Building a Music Controlling Python Start Page for Linux" />
+    <meta name="twitter:description" content="By bundling Playerctl with Bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage." />
+    <meta name="twitter:url" content="https://www.devpy.me/building-a-python-music-indicating-start-page-2/" />
+    <meta name="twitter:image" content="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="Robert Washbourne" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="programming, themes, python" />
+    <meta name="twitter:site" content="@devpytech" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="500" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "DevPy",
+        "url": "https://www.devpy.me/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.devpy.me/content/images/2016/12/devpyc.png"
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Robert Washbourne",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/69e63cb22a93b5779ab522847f51d0d3?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "https://www.devpy.me/author/robert/",
+        "sameAs": []
+    },
+    "headline": "Building a Music Controlling Python Start Page for Linux",
+    "url": "https://www.devpy.me/building-a-python-music-indicating-start-page-2/",
+    "datePublished": "2017-02-21T18:44:16.000Z",
+    "dateModified": "2017-09-05T20:48:45.000Z",
+    "image": {
+        "@type": "ImageObject",
+        "url": "https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif",
+        "width": 800,
+        "height": 500
+    },
+    "keywords": "programming, themes, python",
+    "description": "By using the Gnome GLib apis, we can use the Playerctl Linux package with\nPython. Bundling this with bottle, a simple Python server, and websockets to\nlisten for updates, we have a music controlling homepage.\n\nDependencies\nYou will of course need Python. Here, I use python2 because gevent (the\nwebsocket) does not support Python3.\n\nLinux packages you need:\n\n * Playerctl [https://github.com/acrisci/playerctl]\n\nPython dependencies (install with pip):\n\n * bottle\n * bottle-websocket\n\nGithub\nYou can d",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.devpy.me/"
+    }
+}
+    </script>
+
+    <script defer src="/public/members.js/?v=f5980b8f9c"></script>
+    <meta name="generator" content="Ghost 3.13" />
+    <link rel="alternate" type="application/rss+xml" title="DevPy" href="https://www.devpy.me/rss/" />
+    <style>
+h1.lh-title, h2 {
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+    padding: 8px !important;
+}
+
+.isso-comment:not(:last-of-type), .isso-follow-up .isso-comment {
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+    
+.isso-comment:not(:first-of-type), .isso-follow-up .isso-comment {
+    border-top: none;
+}
+
+#isso-root {
+    display: flex;
+    flex-direction: column-reverse;
+}
+.isso-comment {
+    flex: 0;
+    width: 100%;
+}
+#isso-thread .avatar > svg[data-hash="31bd3215b1cf"] {
+    background-image: url(https://static.devpy.me/assets/favicons/android-chrome-48x48.png);
+    background-size: contain;
+}
+#isso-thread .avatar > svg[data-hash="31bd3215b1cf"] > rect {
+    display: none;
+}
+#carbonads {
+    margin-top: -10px;
+    z-index: 2;
+    position: relative;
+    background: white;
+}
+#sidebar > div.mt2 {
+    position: relative;
+}
+#sidebar > div:first-child::after {
+    content: "♪♪ ヽ(ˇ∀ˇ )ゞ";
+    position: absolute;
+    top: 4px;
+    z-index: 0;
+    width: calc(100% - 44px);
+    text-align: center;
+}
+</style>
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" />
+    <link rel="stylesheet" href="/assets/css/normalize.css?v=f5980b8f9c">
+    <link rel="stylesheet" href="/assets/css/tachyons.min.css?v=f5980b8f9c">
+    <link rel="stylesheet" href="/assets/css/screen.css?v=f5980b8f9c">
+    <link rel="stylesheet" href="/assets/css/prism-tomorrow.min.css?v=f5980b8f9c">
+</head>
+<body class="fl w-100">
+    <div class="site-wrapper center mw8 w-100 cf">
+
+        <header class="bg-white black-80">
+    <div style="background-image: url(/content/images/2016/12/background.jpg); background-size: cover; text-align: center;height: 78px;" class="w-100 pt2 pb2">
+        <a class="blog-logo h-100-l" href="//www.devpy.me/"><img class="h-100" id="header-image" src="/content/images/2016/12/devpyc.png" alt="DevPy" /></a>
+        <div style="display:none;">The best software recommendations, linux tweaks, and custom code before it&#x27;s cool.</div>
+    </div>
+    <nav id="topnav" class="mt1 pv2 pv3-ns bb w-100">
+        <a class="link dim black b f6 f5-ns dib mr3" href="/" title="Home">DevPy</a>
+        <a class=" link dim gray f6 f5-ns dib mr3" href="https://www.devpy.me/search/" title="Search">Search</a>
+<a class="subscribe-button link dim gray f6 f5-ns dib" href="/subscribe/">Subscribe</a>
+        <span class="sharebuttons" style="float:right;margin-top: -0.25rem;">
+        <a href="https://www.facebook.com/sharer/sharer.php?u=https://www.devpy.me/building-a-python-music-indicating-start-page-2/&t=Building a Music Controlling Python Start Page for Linux" onclick="ga('send', 'event', 'Share', 'facebook');window.open(this.href, 'facebook-share','width=580,height=296');return false;" title="Share on Facebook" target="_blank"><img alt="Share on Facebook" src="/assets/black/Facebook.png?v=f5980b8f9c"></a>
+        <a href="https://twitter.com/intent/tweet?source=https://www.devpy.me/building-a-python-music-indicating-start-page-2/&text=Building a Music Controlling Python Start Page for Linux https://www.devpy.me/building-a-python-music-indicating-start-page-2/&via=devpytech"  onclick="ga('send', 'event', 'Share', 'twitter');window.open(this.href, 'twitter-share', 'width=550,height=235');return false;" target="_blank" title="Tweet"><img alt="Tweet" src="/assets/black/Twitter.png?v=f5980b8f9c"></a>
+        <a href="https://www.reddit.com/submit?url=https://www.devpy.me/building-a-python-music-indicating-start-page-2/&title=Building a Music Controlling Python Start Page for Linux" onclick="ga('send', 'event', 'Share', 'reddit');window.open(this.href, 'reddit-share','width=873,height=692');return false;" target="_blank" title="Submit to Reddit"><img alt="Submit to Reddit" src="/assets/black/Reddit.png?v=f5980b8f9c"></a>
+        </span>
+    </nav>
+</header>
+        
+		<div id="sidebar" class="sidebar w-20-l w-100 fr pa2 cf">
+            <div class="mt2 center bg-white br3 pa3 mv3 ba b--black-10"><script async type="text/javascript" src="//cdn.carbonads.com/carbon.js?serve=CKYIE5Q7&placement=devpyme" id="_carbonads_js"></script></div>
+            
+            <article id='devpyinfodiv' class="mw5 mt2 center bg-white br3 pa3 mv3 ba b--black-10 frontside-flip" style="clear: both;">
+							<div class="tc">
+								<img src="/assets/favicons/android-chrome-192x192.png?v=f5980b8f9c" class="h3 w3 dib" title="DevPy">
+								</div>
+
+								<p class="lh-copy measure center f6 black-70">
+								On this website, you will find tutorials for installing & managing software, lists of the best linux resources, and in depth guides to linux.
+								</p>
+                                <a href="https://www.devpy.me/slack" style="
+                                    font-weight: bold;
+                                    font-size: .875rem;
+                                ">Join us on Slack</a>
+						</article>
+						
+						<div class="mt2 center bg-white br3 pa3 mv3 ba b--black-10 backside-flip">
+							<div id="devpromo">
+							<span>
+								<span class="devpromo-wrap">
+						
+								<a href="//bit.ly/extravm" class="devpromo-text" target="_blank">
+								Get a high performance KVM VPS from ExtraVM. Starting at $3/month for a 512mb 7700k vCPU.
+								</a>
+								</span>
+							</span>
+							</div>
+							</div>
+        </div>
+        
+        
+
+<nav id="articlenav" class="mw8 pv2 pv3-ns bb bg-white w-100" style="display: none;">
+    <a class="link dim black b f6 f5-ns dib mr3" href="https://www.devpy.me" title="Home">DevPy</a>
+    <span class="gray f6 f5-ns dib mr3" id="titlenav">Building a Music Controlling Python Start Page for Linux</span>
+    <span class="sharebuttons" style="position: absolute;right: 0;margin-top: -0.25rem;">
+    <a href="https://www.facebook.com/sharer/sharer.php?u=https://www.devpy.me/building-a-python-music-indicating-start-page-2/" onclick="ga('send', 'event', 'Share', 'facebook');window.open(this.href, 'facebook-share','width=580,height=296');return false;ga('send', 'event', 'Share', 'facebook', 'Share');" title="Share on Facebook" target="_blank"><img alt="Share on Facebook" src="/assets/black/Facebook.png?v=f5980b8f9c"></a>
+    <a href="https://twitter.com/intent/tweet?source=https://www.devpy.me/building-a-python-music-indicating-start-page-2/&text=Building a Music Controlling Python Start Page for Linux https://www.devpy.me/building-a-python-music-indicating-start-page-2/&via=devpytech"  onclick="ga('send', 'event', 'Share', 'twitter');window.open(this.href, 'twitter-share', 'width=550,height=235');return false;ga('send', 'event', 'Share', 'twitter', 'Share');" target="_blank" title="Tweet"><img alt="Tweet" src="/assets/black/Twitter.png?v=f5980b8f9c"></a>
+    <a href="https://www.reddit.com/submit?url=https://www.devpy.me/building-a-python-music-indicating-start-page-2/" onclick="ga('send', 'event', 'Share', 'reddit');window.open(this.href, 'reddit-share','width=873,height=692');return false;ga('send', 'event', 'Share', 'reddit', 'Share');" target="_blank" title="Submit to Reddit"><img alt="Submit to Reddit" src="/assets/black/Reddit.png?v=f5980b8f9c"></a>
+    </span>
+</nav>
+
+<div class="w-80-l w-100 fl pr3">
+<main class="content bg-white black-80" role="main">
+    <article class="post tag-programming tag-themes tag-python athelas">
+        <h1 class="lh-title">Building a Music Controlling Python Start Page for Linux</h1>
+        <p class="gray db"><a href="/author/robert/">Robert Washbourne</a> - 3 years ago - <a href="/tag/programming/">programming</a>, <a href="/tag/themes/">themes</a>, <a href="/tag/python/">python</a></p>
+        <img src="/content/images/2017/02/ezgif.com-video-to-gif--1-.gif" />
+        <!--kg-card-begin: markdown--><p>By using the Gnome GLib apis, we can use the Playerctl Linux package with Python. Bundling this with bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage.</p>
+<h2 id="dependencies">Dependencies</h2>
+<p>You will of course need Python. Here, I use python2 because gevent (the websocket) does not support Python3.</p>
+<p>Linux packages you need:</p>
+<ul>
+<li><a href="https://github.com/acrisci/playerctl">Playerctl</a></li>
+</ul>
+<p>Python dependencies (install with pip):</p>
+<ul>
+<li>bottle</li>
+<li>bottle-websocket</li>
+</ul>
+<h2 id="github">Github</h2>
+<p>You can download all the code for this project <a href="https://github.com/devpytech/musicpage">on DevPy's github here</a>.</p>
+<p>You can clone this to your computer with</p>
+<pre><code class="language-bash">git clone https://github.com/devpytech/musicpage.git
+</code></pre>
+<h2 id="addingawebsocket">Adding a websocket</h2>
+<p>First we need to import the (extensive) list of packages.</p>
+<pre><code class="language-python">#!/usr/bin/env python2
+from bottle.ext.websocket import GeventWebSocketServer
+import gi
+gi.require_version('Playerctl', '1.0')
+from gi.repository import GLib, GObject, Playerctl
+from bottle.ext.websocket import websocket
+from geventwebsocket.exceptions import WebSocketError
+from bottle import run, get
+import threading
+import os
+from gevent import monkey
+monkey.patch_all()
+
+print(&quot;starting websocket&quot;)
+</code></pre>
+<h3 id="addingaroute">Adding a route</h3>
+<p>When the main page connects to the websocket, we send the attributes so we can update the display.</p>
+<pre><code class="language-python">@get('/websocket', apply=[websocket]) #provide a websocket connection
+def echo(ws):
+    print(&quot;connected&quot;)
+    # send the music status
+    ws.send('%s,%s,%s,%s' % (os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property(&quot;status&quot;)))
+</code></pre>
+<h3 id="playerctlprocess">Playerctl process</h3>
+<p>We can make a new Playerctl player with <code>player = Playerctl.Player()</code> and run a loop to check for updates with <code>player.on('metadata', on_track_change)</code> and <code>GLib.MainLoop().run()</code>. When the track is updated, we send a message to the webpage.</p>
+<pre><code class="language-python">@get('/websocket', apply=[websocket])
+def echo(ws):
+    print(&quot;connected&quot;)
+    # send the music status
+    ws.send('%s,%s,%s,%s' % (os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property(&quot;status&quot;)))
+    def on_track_change(player, e):
+        #this function will run when the music is updated (paused, skipped, etc.)
+        try: #see if the connection is still open
+            ws.send('%s,%s,%s,%s' % (os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property(&quot;status&quot;)))
+        except WebSocketError: #if it's not open, stop the process
+            player.stop()
+            loop.quit()
+            ws.close()
+
+    player = Playerctl.Player()
+    player.on('metadata', on_track_change) #listen for music updates
+
+    loop = GLib.MainLoop() 
+    loop.run() #run the playerctl updater
+    print(&quot;Disconnected from websocket&quot;)
+
+run(host='0.0.0.0', port=7000, server=GeventWebSocketServer) #run the server
+</code></pre>
+<h2 id="frontend">Frontend</h2>
+<p>In this section, we create the webpage that is shown (and updated in real time) for the user.</p>
+<h3 id="settings">Settings</h3>
+<p>Here we add color choosing and links that we use in html later.</p>
+<pre><code class="language-python">#!/usr/bin/env python2
+from bottle import route, run, request, get, post, static_file
+import gi
+gi.require_version('Playerctl', '1.0')
+from gi.repository import GLib, GObject, Playerctl
+from subprocess import Popen
+import sys
+import os
+
+Popen([sys.executable, './sendup.py']) #run the websocket script in the same folder (used to update info)
+
+############
+# SETTINGS
+############
+
+links = [['DevPy','http://DevPy.me'],['Reddit','http://Reddit.com'],['Google','http://Google.com']] #List of links to add to page
+
+theme = 'dark' #light or dark theme (sets colors)
+
+############
+# /SETTINGS
+############
+
+if theme == 'dark':
+    bgc = '#222'
+    fgc = 'rgba(255,255,255,0.6)'
+    bw = 'gray'
+else:
+    bgc = '#fff'
+    fgc = '#111'
+    bw = 'black'
+
+for x in range(len(links)):
+    #create list of links
+    links[x] = '&lt;a class=&quot;db link no-underline underline-hover '+bw+'&quot; href=&quot;'+links[x][1]+'&quot;&gt;'+links[x][0]+'&lt;/a&gt;'
+
+linkhtml = '''&lt;div class=&quot;db center&quot; style=&quot;width: 182px;&quot;&gt;&lt;div class=&quot;mt4 lh-copy&quot;&gt;'''
+
+#add the links together
+for x in links:
+    linkhtml += x
+
+linkhtml += '''&lt;/div&gt;&lt;/div&gt;'''
+</code></pre>
+<h3 id="html">HTML</h3>
+<p>We generate the initial look of the app. The artist, song, and image are initialized as well.</p>
+<pre><code class="language-python">@get('/') # or @route('/login')
+def index():
+    player = Playerctl.Player() #grab a player
+    try: #Check if a music app is open (spotify, audacious, vlc,...)
+        title = player.get_title()
+        artist = player.get_artist()
+        img = os.popen(&quot;playerctl metadata mpris:artUrl&quot;).read()
+    except: #if nothing is open just show blank music
+        title = ''
+        artist = ''
+        img = ''
+
+    return '''
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Start Page&lt;/title&gt;
+&lt;link rel=&quot;stylesheet&quot; href=&quot;/static/tachyons.css&quot; /&gt;
+&lt;style&gt;
+/* Here we add the icons for play/pause/next/forward */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url(/static/mat.woff2) format('woff2');
+}
+.material-icons {
+  cursor: pointer;
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+.material-icons.md-light { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark { color: rgba(255, 255, 255, 1); }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style=&quot;background-color:'''+bgc+'''&quot;&gt;
+&lt;div style=&quot;position:relative; top: 35%%; transform: translateY(-50%%); &quot;&gt;
+&lt;div class=&quot;mt4 db center black link&quot; style=&quot;width: 178px;&quot;&gt;
+  &lt;img id=&quot;img&quot; style=&quot;width:180px;height:178px;background-color:#222;&quot;class=&quot;db ba b--black-10&quot; src=&quot;%s&quot;&gt;
+  &lt;dl class=&quot;mt2 lh-copy&quot;&gt;
+    &lt;dt class=&quot;clip&quot;&gt;Title&lt;/dt&gt;
+    &lt;dd id=&quot;title&quot; class=&quot;ml0 fw9&quot; style=&quot;color:''' % (img)+fgc+'''&quot;&gt;%s&lt;/dd&gt;
+    &lt;dt class=&quot;clip&quot;&gt;Artist&lt;/dt&gt;
+    &lt;dd id=&quot;artist&quot; class=&quot;ml0 gray&quot;&gt;%s&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;div style=&quot;text-align:center;color:''' % (title, artist)+fgc+'''&quot;&gt;
+    &lt;a onclick=&quot;previous();&quot; style=&quot;float:left;&quot;&gt;&lt;i class=&quot;material-icons md-'''+theme+'''&quot;&gt;skip_previous&lt;/i&gt;&lt;/a&gt;
+    &lt;a onclick=&quot;toggle();&quot;&gt;&lt;i id =&quot;stateicon&quot; style=&quot;width:32px;&quot; class=&quot;material-icons md-'''+theme+'''&quot;&gt;pause_arrow&lt;/i&gt;&lt;/a&gt;
+    &lt;a onclick=&quot;next();&quot; style=&quot;float:right;&quot;&gt;&lt;i class=&quot;material-icons md-'''+theme+'''&quot;&gt;skip_next&lt;/i&gt;&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+''' + linkhtml + # add the scripts below here
+</code></pre>
+<h3 id="scripts">Scripts</h3>
+<p>Here we add some jquery scripts to talk to the server.</p>
+<pre><code class="language-python"># attach this to the previous html code
+'''
+&lt;/div&gt;
+&lt;script src=&quot;/static/jquery-3.1.1.min.js&quot;&gt;&lt;/script&gt;
+&lt;script type=&quot;text/javascript&quot;&gt;
+var ws;
+ws = new WebSocket(&quot;ws://0.0.0.0:7000/websocket&quot;);
+ws.onopen = function (evt) {
+  ws.send(&quot;Connected&quot;);
+};
+ws.onclose = function (evt) {
+  ws.send(&quot;Closed&quot;);
+};
+
+//in this function we listen for updates from the server and write them to the page.
+ws.onmessage = function (evt) {
+    var array = evt.data.split(',');
+    if (array.length == 4) {
+        console.log(array);
+        $(&quot;#img&quot;).attr(&quot;src&quot;, array[0]);
+        $(&quot;#title&quot;).text(array[1]);
+        $(&quot;#artist&quot;).text(array[2]);
+        if (array[3] === 'Playing') {
+            $('#stateicon').text('pause');
+        } else {
+            $('#stateicon').text('play_arrow');
+        }
+        ws.send(&quot;Updated&quot;);
+    } else {
+        ws.send(&quot;OK.&quot;)
+    }
+};
+&lt;/script&gt;
+&lt;script&gt;
+// when the buttons are pressed, post the server
+function next() {
+    $.post('/next')
+    return false;
+}
+function previous() {
+    $.post('/previous')
+    return false;
+}
+function toggle() {
+    $.post('/toggle');
+    return false;
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+'''
+</code></pre>
+<h3 id="postreplies">Post replies</h3>
+<p>Control the music when the client POSTs the server.</p>
+<pre><code class="language-python">@post('/next')
+def next_song():
+    Playerctl.Player().next()
+
+@post('/previous')
+def next_song():
+    Playerctl.Player().previous()
+
+@post('/toggle')
+def next_song():
+    Playerctl.Player().play_pause()
+
+@post('/status')
+def is_playing():
+    return Playerctl.Player().get_property(&quot;status&quot;)
+
+@route('/static/&lt;filename:path&gt;') #This is for static files
+def send_static(filename):
+    return static_file(filename, root=os.path.dirname(os.path.realpath(' ')))
+
+run(host='0.0.0.0', port=8080) #run the server
+</code></pre>
+<h2 id="finishingup">Finishing up</h2>
+<p>Now you should have a nice music controlling start page. You can make this show as the new tab on Chrome with <a href="https://chrome.google.com/webstore/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna">this extension</a>, and on Firefox with <a href="https://addons.mozilla.org/en-US/firefox/addon/new-tab-override/">this one</a>. Just set the url to <code>0.0.0.0:8080</code>.</p>
+<p><img src="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--2-.gif" alt=""></p>
+<p>Here I use my method to <a href="http://www.devpy.me/how-to-add-a-music-visualizer-to-your-linux-desktop/">show a music visualizer</a> on the desktop, plus <a href="http://www.devpy.me/your-guide-to-a-comfortable-linux-desktop-with-openbox/">my openbox setup</a>.</p>
+<p><a href="https://youtu.be/LY481F1r6G8">Youtube video</a></p>
+<!--kg-card-end: markdown-->
+    </article>
+</main>
+
+<section class="post-comments">
+    <script data-isso="https://comments.devpy.me"
+            src="https://comments.devpy.me/js/embed.min.js"
+            data-isso-require-author="true"
+            data-isso-require-email="true"></script>
+
+    <section id="isso-thread"></section>
+</section>
+
+<aside class="read-next">
+    <article class="bg-white w-100 w-50-l h-100 fl mt3">
+      <div class="ba b--black-10 ma1">
+      <a href="/10-of-the-best-linux-icon-themes-compared/" title="10 Of The Best Linux Icon Themes Compared">
+        <div style="background-color: grey; background-image: url(); height:200px; background-size: cover; background-position: 50% 50%;"></div>
+      </a>
+      <div class="pa3">
+        <a href="/10-of-the-best-linux-icon-themes-compared/" class="lh-title f5 b pointer dib bg-white black-70 link underline-hover border-box">10 Of The Best Linux Icon Themes Compared</a>
+        <p class="gray db" style="height: 84px;">Linux generally has good, clean looks but the icons are sometimes... a bit lacking. However, with a few small changes, <a href="/10-of-the-best-linux-icon-themes-compared/" class="f5 b pointer dib bg-white black-70 link underline-hover border-box">[...]</a></p>
+        <small class="gray db pv2"><a href="Robert Washbourne">Robert Washbourne</a> - 3 years ago - <a href="/tag/themes/">themes</a></small>
+      </div>
+      </div>
+    </article>
+    <article class="bg-white w-100 w-50-l h-100 fl mt3">
+      <div class="ba b--black-10 ma1">
+      <a href="/how-to-add-a-music-visualizer-to-your-linux-desktop/" title="How to Add a Music Visualizer to Your Linux Desktop">
+        <div style="background-color: grey; background-image: url(); height:200px; background-size: cover; background-position: 50% 50%;"></div>
+      </a>
+      <div class="pa3">
+        <a href="/how-to-add-a-music-visualizer-to-your-linux-desktop/" class="lh-title f5 b pointer dib bg-white black-70 link underline-hover border-box">How to Add a Music Visualizer to Your Linux Desktop</a>
+        <p class="gray db" style="height: 84px;">A great way to add some flair to your desktop is to use a music visualizer, such as cava. However, <a href="/how-to-add-a-music-visualizer-to-your-linux-desktop/" class="f5 b pointer dib bg-white black-70 link underline-hover border-box">[...]</a></p>
+        <small class="gray db pv2"><a href="Robert Washbourne">Robert Washbourne</a> - 3 years ago - <a href="/tag/themes/">themes</a></small>
+      </div>
+      </div>
+    </article>
+</aside>
+</div>
+
+<div id="bio_ep">
+    <div class="modal" style="padding:20px;">
+        <img src="/content/images/2016/06/DevPy.png" style="top: 0;width: 270px;position: absolute;right: 100%;">
+        <div class="modal-title">
+            <h3>DevPy Newletter</h3>
+        </div>
+
+        <div class="modal-body">
+            <i>Learn more open source.</i>
+            <p>We don't spam, and we only send emails once or twice a <s>week</s> month.</p>
+            <form id="subscribePop" onsubmit="event.preventDefault(); doSubPop();">
+                <div id="subscribe">
+                  <input type="email" value="" name="EMAIL" class="email gh-input" id="emailPop" placeholder="email address" required>
+                  <input type="submit" value="Subscribe" name="subscribe" class="button" style="width:160px !important">
+                </div>
+            </form>
+            <p id="subresPop"></p>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="/assets/bioep.min.js?v=f5980b8f9c"></script>
+<script>
+try {
+   bioEp.init({
+      width: 500,
+      height: 270,
+      cookieExp: 200
+    });
+    document.getElementById("bio_ep_close").innerHTML = "no thanks";
+}
+catch (e) {
+   console.log("welcome back!");
+}
+</script>
+<script async>
+var topper, el, flipper, disttop, advert, body, height;
+
+function scrollSidebar() {
+      var y = (document.documentElement && document.documentElement.scrollTop) || document.body.scrollTop;
+    if (y >= disttop) {
+      if (advert.className != 'sidebar w-20-l w-100 fr pa2 cf stickycarb') {
+        topper.style = 'visibility: hidden;';
+        el.style = 'position: fixed; top: 0; z-index:9999;';
+        advert.className = 'sidebar w-20-l w-100 fr pa2 cf stickycarb';
+      }
+    }
+    else {
+      if (advert.className != 'sidebar w-20-l w-100 fr pa2 cf') {
+        topper.style = 'visibility: visible;';
+        el.style = 'display: none;';
+        advert.className = 'sidebar w-20-l w-100 fr pa2 cf';
+      }
+    }
+
+    if (y >= height) {
+      if (flipper.className != 'mw5 mt2 center bg-white br3 pa3 mv3 ba b--black-10 frontside-flip flipped') {
+        flipper.className = 'mw5 mt2 center bg-white br3 pa3 mv3 ba b--black-10 frontside-flip flipped';
+      }
+    }
+    else {
+      if (flipper.className != 'mw5 mt2 center bg-white br3 pa3 mv3 ba b--black-10 frontside-flip') {
+        flipper.className = 'mw5 mt2 center bg-white br3 pa3 mv3 ba b--black-10 frontside-flip';
+      }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function() {
+    topper = document.getElementById('topnav');
+    el = document.getElementById('articlenav');
+    flipper = document.getElementById('devpyinfodiv');
+    disttop = document.getElementById('topnav').offsetTop;
+    advert = document.getElementById('sidebar');
+
+    body = document.body,
+    html = document.documentElement;
+
+    height = Math.max( body.scrollHeight, body.offsetHeight,
+                         html.clientHeight, html.scrollHeight, html.offsetHeight ) * 0.15 ;
+    scrollSidebar();
+
+    window.onscroll = scrollSidebar;
+}, false);
+</script>
+<script async>
+function post(path, params) {
+    var http = new XMLHttpRequest();
+    var url = path;
+    http.open("POST", url, true);
+
+    //Send the proper header information along with the request
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    http.onreadystatechange = function() {//Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+            var res = JSON.parse(http.responseText);
+            var subres = document.getElementById("subres");
+
+            if (res["status"] === "success") {
+                subres.innerHTML = "You are now subscribed.";
+                ga('send', 'event', 'Subscribe', 'subscribe', 'Post');
+            } else {
+                subres.innerHTML = res["status"];
+            }
+        }
+    }
+    http.send(params);
+}
+function postPop(path, params) {
+    var http = new XMLHttpRequest();
+    var url = path;
+    http.open("POST", url, true);
+
+    //Send the proper header information along with the request
+    http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+
+    http.onreadystatechange = function() {//Call a function when the state changes.
+        if(http.readyState == 4 && http.status == 200) {
+            var res = JSON.parse(http.responseText);
+            var subres = document.getElementById("subresPop");
+            var close = document.getElementById("bio_ep_close");
+
+            if (res["status"] === "success") {
+                subres.innerHTML = "You are now subscribed.";
+                ga('send', 'event', 'Subscribe', 'subscribe', 'Popup');
+                close.innerHTML = "close";
+            } else {
+                subres.innerHTML = res["status"];
+            }
+        }
+    }
+    http.send(params);
+}
+
+function doSub() {
+    var em = document.getElementById("email").value;
+    post('https://grunt.devpy.me/subscribe', "email="+em);
+}
+function doSubPop() {
+    var em = document.getElementById("emailPop").value;
+    postPop('https://grunt.devpy.me/subscribe', "email="+em);
+}
+</script>
+
+        
+        <footer class="mt3 pv3 ph3 ph4-m ph5-l mid-gray w-100 fl bt">
+          <small class="f6 db tc">&copy; 2020 <b class="ttu">DevPy</b>. Inquiries at <b>robert@devpy.me</b></small>
+          <div class="tc mt3">
+            <a href="/tag/themes/" title="Themes" class="f6 dib ph2 link mid-gray dim">Linux Themes</a>
+						<a href="/tag/desktops/" title="Desktops" class="f6 dib ph2 link mid-gray dim">Linux Desktops</a>
+						<a href="/about/" title="About" class="f6 dib ph2 link mid-gray dim">About</a>
+						<a href="/privacy-policy/" title="Privacy" class="f6 dib ph2 link mid-gray dim">Privacy</a>
+          </div>
+        </footer>
+    </div>
+
+    <script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/assets/service-worker.js');
+}
+</script>
+	<script async>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-77238872-2', 'auto');
+		ga('send', 'pageview');
+	</script>
+
+    <script src="/assets/prism.min.js?v=f5980b8f9c"></script>
+    <script src="/assets/prism-bash.min.js?v=f5980b8f9c"></script>
+
+        <script src="/assets/prism-python.min.js?v=f5980b8f9c"></script>
+</body>
+</html>

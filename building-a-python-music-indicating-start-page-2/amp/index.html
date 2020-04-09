@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html ⚡>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <title>Building a Music Controlling Python Start Page for Linux</title>
+    
+    <meta name="HandheldFriendly" content="True" />
+    <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+
+    <link rel="apple-touch-icon" sizes="57x57" href="/assets/favicons/apple-touch-icon-57x57.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="60x60" href="/assets/favicons/apple-touch-icon-60x60.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="72x72" href="/assets/favicons/apple-touch-icon-72x72.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="76x76" href="/assets/favicons/apple-touch-icon-76x76.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="114x114" href="/assets/favicons/apple-touch-icon-114x114.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="120x120" href="/assets/favicons/apple-touch-icon-120x120.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="144x144" href="/assets/favicons/apple-touch-icon-144x144.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/favicons/apple-touch-icon-152x152.png?v=f5980b8f9c">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicons/apple-touch-icon-180x180.png?v=f5980b8f9c">
+    <link rel="icon" type="image/png" href="/assets/favicons/favicon-32x32.png?v=f5980b8f9c" sizes="32x32">
+    <link rel="icon" type="image/png" href="/assets/favicons/android-chrome-192x192.png?v=f5980b8f9c" sizes="192x192">
+    <link rel="icon" type="image/png" href="/assets/favicons/favicon-96x96.png?v=f5980b8f9c" sizes="96x96">
+    <link rel="icon" type="image/png" href="/assets/favicons/favicon-16x16.png?v=f5980b8f9c" sizes="16x16">
+    <link rel="manifest" href="/assets/favicons/manifest.json?v=f5980b8f9c">
+    <link rel="mask-icon" href="/assets/favicons/safari-pinned-tab.svg?v=f5980b8f9c" color="#c64842">
+    <link rel="shortcut icon" href="/favicon.png">
+    <meta name="msapplication-TileColor" content="#c64842'}}">
+    <meta name="msapplication-TileImage" content="/assets/favicons/mstile-144x144.png?v=f5980b8f9c">
+    <meta name="msappliandcation-config" content="/assets/favicons/browserconfig.xml?v=f5980b8f9c">
+    <meta name="theme-color" content="#c64842">
+    
+    <script async src="https://cdn.ampproject.org/v0.js"></script>
+    
+    <meta name="description" content="By bundling Playerctl with Bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage." />
+    <link rel="shortcut icon" href="/favicon.png" type="image/png" />
+    <link rel="canonical" href="https://www.devpy.me/building-a-python-music-indicating-start-page-2/" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    
+    <meta property="og:site_name" content="DevPy" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Building a Music Controlling Python Start Page for Linux" />
+    <meta property="og:description" content="By bundling Playerctl with Bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage." />
+    <meta property="og:url" content="https://www.devpy.me/building-a-python-music-indicating-start-page-2/" />
+    <meta property="og:image" content="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif" />
+    <meta property="article:published_time" content="2017-02-21T18:44:16.000Z" />
+    <meta property="article:modified_time" content="2017-09-05T20:48:45.000Z" />
+    <meta property="article:tag" content="programming" />
+    <meta property="article:tag" content="themes" />
+    <meta property="article:tag" content="python" />
+    
+    <meta property="article:publisher" content="https://www.facebook.com/devpytech" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Building a Music Controlling Python Start Page for Linux" />
+    <meta name="twitter:description" content="By bundling Playerctl with Bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage." />
+    <meta name="twitter:url" content="https://www.devpy.me/building-a-python-music-indicating-start-page-2/" />
+    <meta name="twitter:image" content="https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif" />
+    <meta name="twitter:label1" content="Written by" />
+    <meta name="twitter:data1" content="Robert Washbourne" />
+    <meta name="twitter:label2" content="Filed under" />
+    <meta name="twitter:data2" content="programming, themes, python" />
+    <meta name="twitter:site" content="@devpytech" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="500" />
+    
+    <script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "publisher": {
+        "@type": "Organization",
+        "name": "DevPy",
+        "url": "https://www.devpy.me/",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.devpy.me/content/images/2016/12/devpyc.png"
+        }
+    },
+    "author": {
+        "@type": "Person",
+        "name": "Robert Washbourne",
+        "image": {
+            "@type": "ImageObject",
+            "url": "//www.gravatar.com/avatar/69e63cb22a93b5779ab522847f51d0d3?s=250&d=mm&r=x",
+            "width": 250,
+            "height": 250
+        },
+        "url": "https://www.devpy.me/author/robert/",
+        "sameAs": []
+    },
+    "headline": "Building a Music Controlling Python Start Page for Linux",
+    "url": "https://www.devpy.me/building-a-python-music-indicating-start-page-2/",
+    "datePublished": "2017-02-21T18:44:16.000Z",
+    "dateModified": "2017-09-05T20:48:45.000Z",
+    "image": {
+        "@type": "ImageObject",
+        "url": "https://www.devpy.me/content/images/2017/02/ezgif.com-video-to-gif--1-.gif",
+        "width": 800,
+        "height": 500
+    },
+    "keywords": "programming, themes, python",
+    "description": "By using the Gnome GLib apis, we can use the Playerctl Linux package with\nPython. Bundling this with bottle, a simple Python server, and websockets to\nlisten for updates, we have a music controlling homepage.\n\nDependencies\nYou will of course need Python. Here, I use python2 because gevent (the\nwebsocket) does not support Python3.\n\nLinux packages you need:\n\n * Playerctl [https://github.com/acrisci/playerctl]\n\nPython dependencies (install with pip):\n\n * bottle\n * bottle-websocket\n\nGithub\nYou can d",
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://www.devpy.me/"
+    }
+}
+    </script>
+
+    <meta name="generator" content="Ghost 3.13" />
+    <link rel="alternate" type="application/rss+xml" title="DevPy" href="https://www.devpy.me/rss/" />
+    
+    <script async custom-element="amp-analytics" src="https://cdn.ampproject.org/v0/amp-analytics-0.1.js"></script>
+    <script async custom-element="amp-social-share" src="https://cdn.ampproject.org/v0/amp-social-share-0.1.js"></script>
+    <script async custom-element="amp-iframe" src="https://cdn.ampproject.org/v0/amp-iframe-0.1.js"></script>
+    
+    <script async custom-element="amp-anim" src="https://cdn.ampproject.org/v0/amp-anim-0.1.js"></script>        
+
+    <style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style><noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700" />
+    <style amp-custom>
+/* ==========================================================================
+   Table of Contents
+   ========================================================================== */
+
+/*
+
+    0. Normalize
+    1. General
+    2. Utilities
+    3. AMP Post
+    4. Footer
+
+*/
+
+/* ==========================================================================
+   0. normalize.css v3.0.3 | MIT License | git.io/normalize | (minified)
+   ========================================================================== */
+html {
+    font-family: sans-serif;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+body {
+    margin: 0;
+}
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+main,
+menu,
+nav,
+section,
+summary {
+    display: block;
+}
+audio,
+canvas,
+progress,
+video {
+    display: inline-block;
+    vertical-align: baseline;
+}
+audio:not([controls]) {
+    display: none;
+    height: 0;
+}
+[hidden],
+template {
+    display: none;
+}
+a {
+    background-color: transparent;
+}
+a:active,
+a:hover {
+    outline: 0;
+}
+abbr[title] {
+    border-bottom: 1px dotted;
+}
+b,
+strong {
+    font-weight: bold;
+}
+dfn {
+    font-style: italic;
+}
+h1 {
+    margin: 0.67em 0;
+    font-size: 2em;
+}
+mark {
+    background: #ff0;
+    color: #000;
+}
+small {
+    font-size: 80%;
+}
+sub,
+sup {
+    position: relative;
+    vertical-align: baseline;
+    font-size: 75%;
+    line-height: 0;
+}
+sup {
+    top: -0.5em;
+}
+sub {
+    bottom: -0.25em;
+}
+img {
+    border: 0;
+}
+amp-img {
+    border: 0;
+}
+svg:not(:root) {
+    overflow: hidden;
+}
+figure {
+    margin: 1em 40px;
+}
+hr {
+    box-sizing: content-box;
+    height: 0;
+}
+pre {
+    overflow: auto;
+}
+code,
+kbd,
+pre,
+samp {
+    font-family: monospace, monospace;
+    font-size: 1em;
+}
+button,
+input,
+optgroup,
+select,
+textarea {
+    margin: 0;
+    color: inherit;
+    font: inherit;
+}
+button {
+    overflow: visible;
+}
+button,
+select {
+    text-transform: none;
+}
+button,
+html input[type="button"],
+input[type="reset"],
+input[type="submit"] {
+    cursor: pointer;
+
+    -webkit-appearance: button;
+}
+button[disabled],
+html input[disabled] {
+    cursor: default;
+}
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+    padding: 0;
+    border: 0;
+}
+input {
+    line-height: normal;
+}
+input[type="checkbox"],
+input[type="radio"] {
+    box-sizing: border-box;
+    padding: 0;
+}
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    height: auto;
+}
+input[type="search"] {
+    -webkit-appearance: textfield;
+}
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+    -webkit-appearance: none;
+}
+fieldset {
+    margin: 0 2px;
+    padding: 0.35em 0.625em 0.75em;
+    border: 1px solid #c0c0c0;
+}
+legend {
+    padding: 0;
+    border: 0;
+}
+textarea {
+    overflow: auto;
+}
+optgroup {
+    font-weight: bold;
+}
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+td,
+th {
+    padding: 0;
+}
+
+
+/* ==========================================================================
+   1. General - Setting up some base styles
+   ========================================================================== */
+
+html {
+    max-height: 100%;
+    height: 100%;
+    font-size: 62.5%;
+
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+body {
+    max-height: 100%;
+    height: 100%;
+    color: #3a4145;
+    background: #f4f8fb;
+    letter-spacing: 0.01rem;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 1.8rem;
+    line-height: 1.75em;
+    text-rendering: geometricPrecision;
+
+    -webkit-font-feature-settings: "kern" 1;
+    -moz-font-feature-settings: "kern" 1;
+    -o-font-feature-settings: "kern" 1;
+}
+
+::-moz-selection {
+    background: #d6edff;
+}
+
+::selection {
+    background: #d6edff;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0 0 0.3em 0;
+    color: #2e2e2e;
+    font-family: 'Source Sans Pro', sans-serif;
+    line-height: 1.15em;
+    text-rendering: geometricPrecision;
+
+    -webkit-font-feature-settings: "dlig" 1, "liga" 1, "lnum" 1, "kern" 1;
+    -moz-font-feature-settings: "dlig" 1, "liga" 1, "lnum" 1, "kern" 1;
+    -o-font-feature-settings: "dlig" 1, "liga" 1, "lnum" 1, "kern" 1;
+}
+
+h1 {
+    text-indent: -2px;
+    letter-spacing: -1px;
+    font-size: 2.6rem;
+}
+
+h2 {
+    letter-spacing: 0;
+    font-size: 2.4rem;
+}
+
+h3 {
+    letter-spacing: -0.6px;
+    font-size: 2.1rem;
+}
+
+h4 {
+    font-size: 1.9rem;
+}
+
+h5 {
+    font-size: 1.8rem;
+}
+
+h6 {
+    font-size: 1.8rem;
+}
+
+a {
+    color: #4a4a4a;
+}
+
+a:hover {
+    color: #111;
+}
+
+p,
+ul,
+ol,
+dl {
+    margin: 0 0 2.5rem 0;
+    font-size: 1.5rem;
+    text-rendering: geometricPrecision;
+
+    -webkit-font-feature-settings: "liga" 1, "onum" 1, "kern" 1;
+    -moz-font-feature-settings: "liga" 1, "onum" 1, "kern" 1;
+    -o-font-feature-settings: "liga" 1, "onum" 1, "kern" 1;
+}
+
+ol,
+ul {
+    padding-left: 2em;
+}
+
+ol ol,
+ul ul,
+ul ol,
+ol ul {
+    margin: 0 0 0.4em 0;
+    padding-left: 2em;
+}
+
+dl dt {
+    float: left;
+    clear: left;
+    overflow: hidden;
+    margin-bottom: 1em;
+    width: 180px;
+    text-align: right;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 700;
+}
+
+dl dd {
+    margin-bottom: 1em;
+    margin-left: 200px;
+}
+
+li {
+    margin: 0.4em 0;
+}
+
+li li {
+    margin: 0;
+}
+
+hr {
+    display: block;
+    margin: 1.75em 0;
+    padding: 0;
+    height: 1px;
+    border: 0;
+    border-top: #efefef 1px solid;
+}
+
+blockquote {
+    box-sizing: border-box;
+    margin: 1.75em 0 1.75em 0;
+    padding: 0 0 0 1.75em;
+    border-left: #4a4a4a 0.4em solid;
+
+    -moz-box-sizing: border-box;
+}
+
+blockquote p {
+    margin: 0.8em 0;
+    font-style: italic;
+}
+
+blockquote small {
+    display: inline-block;
+    margin: 0.8em 0 0.8em 1.5em;
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+blockquote small:before {
+    content: "\2014 \00A0";
+}
+
+blockquote cite {
+    font-weight: 700;
+}
+
+blockquote cite a {
+    font-weight: normal;
+}
+
+mark {
+    background-color: #fdffb6;
+}
+
+code,
+tt {
+    padding: 1px 3px;
+    border: #e3edf3 1px solid;
+    background: #f7fafb;
+    border-radius: 2px;
+    white-space: pre-wrap;
+    font-family: Inconsolata, monospace, sans-serif;
+    font-size: 0.85em;
+    font-feature-settings: "liga" 0;
+
+    -webkit-font-feature-settings: "liga" 0;
+    -moz-font-feature-settings: "liga" 0;
+}
+
+pre {
+    overflow: auto;
+    box-sizing: border-box;
+    margin: 0 0 1.75em 0;
+    padding: 10px;
+    width: 100%;
+    background: #2d2d2d;
+    color: #fff;
+    border-radius: 0;
+    white-space: pre;
+    font-family: Inconsolata, monospace, sans-serif;
+    font-size: 0.9em;
+
+    -moz-box-sizing: border-box;
+}
+
+pre code,
+pre tt {
+    padding: 0;
+    border: none;
+    background: transparent;
+    white-space: pre-wrap;
+    font-size: inherit;
+}
+
+kbd {
+    display: inline-block;
+    margin-bottom: 0.4em;
+    padding: 1px 8px;
+    border: #ccc 1px solid;
+    background: #f4f4f4;
+    border-radius: 4px;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2),
+    0 1px 0 0 #fff inset;
+    color: #666;
+    text-shadow: #fff 0 1px 0;
+    font-size: 0.9em;
+    font-weight: 700;
+}
+
+table {
+    box-sizing: border-box;
+    margin: 1.75em 0;
+    max-width: 100%;
+    width: 100%;
+    background-color: transparent;
+
+    -moz-box-sizing: border-box;
+}
+
+.horizontal-scroll-box {
+    display: block;
+    max-width: 100%;
+    width: 100%;
+    overflow-x: auto;
+}
+
+table th,
+table td {
+    padding: 8px;
+    border-top: #efefef 1px solid;
+    vertical-align: top;
+    text-align: left;
+    line-height: 20px;
+}
+
+table th {
+    color: #000;
+}
+
+table caption + thead tr:first-child th,
+table caption + thead tr:first-child td,
+table colgroup + thead tr:first-child th,
+table colgroup + thead tr:first-child td,
+table thead:first-child tr:first-child th,
+table thead:first-child tr:first-child td {
+    border-top: 0;
+}
+
+table tbody + tbody {
+    border-top: #efefef 2px solid;
+}
+
+table table table {
+    background-color: #fff;
+}
+
+table tbody > tr:nth-child(odd) > td,
+table tbody > tr:nth-child(odd) > th {
+    background-color: #f6f6f6;
+}
+
+table.plain tbody > tr:nth-child(odd) > td,
+table.plain tbody > tr:nth-child(odd) > th {
+    background: transparent;
+}
+
+iframe,
+amp-iframe,
+.fluid-width-video-wrapper {
+    display: block;
+    margin: 1.75em 0;
+}
+
+/* When a video is inside the fitvids wrapper, drop the
+margin on the iframe, cause it breaks stuff. */
+.fluid-width-video-wrapper iframe,
+.fluid-width-video-wrapper amp-iframe {
+    margin: 0;
+}
+
+textarea,
+select,
+input {
+    margin: 0 0 5px 0;
+    padding: 6px 9px;
+    width: 260px;
+    outline: 0;
+    border: #e7eef2 1px solid;
+    background: #fff;
+    border-radius: 4px;
+    box-shadow: none;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.4em;
+    font-weight: 100;
+
+    -webkit-appearance: none;
+}
+
+textarea {
+    min-width: 250px;
+    min-height: 80px;
+    max-width: 340px;
+    width: 100%;
+    height: auto;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="search"]:focus,
+input[type="tel"]:focus,
+input[type="url"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+input[type="month"]:focus,
+input[type="week"]:focus,
+input[type="time"]:focus,
+input[type="datetime"]:focus,
+input[type="datetime-local"]:focus,
+textarea:focus {
+    outline: none;
+    outline-width: 0;
+    border: #bbc7cc 1px solid;
+    background: #fff;
+}
+
+select {
+    width: 270px;
+    height: 30px;
+    line-height: 30px;
+}
+
+/* ==========================================================================
+   2. Utilities
+   ========================================================================== */
+
+/* Clears shit */
+.clearfix:before,
+.clearfix:after {
+    content: " ";
+    display: table;
+}
+.clearfix:after {
+    clear: both;
+}
+.clearfix {
+    zoom: 1;
+}
+
+/* ==========================================================================
+   3. AMP Post
+   ========================================================================== */
+
+
+
+.main-header {
+    position: relative;
+    display: table;
+    overflow: hidden;
+    box-sizing: border-box;
+    width: 100%;
+    height: 50px;
+    background-image: url(/content/images/2016/12/background.jpg);
+    background-size: cover;
+    text-align: left;
+
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+
+.content {
+    background: #fff;
+    padding-top: 15px;
+}
+.blog-title {
+  text-align: center;
+  height: 81px;
+}
+.blog-title,
+.content {
+    margin: auto;
+    max-width: 600px;
+}
+
+.blog-title a {
+    display: block;
+    padding-right: 16px;
+    padding-left: 16px;
+    height: 50px;
+    color: #fff;
+    text-decoration: none;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 16px;
+    line-height: 50px;
+    font-weight: 600;
+}
+
+.post {
+    position: relative;
+    margin-top: 0;
+    margin-right: 16px;
+    margin-left: 16px;
+    padding-bottom: 0;
+    max-width: 100%;
+    border-bottom: #ebf2f6 1px solid;
+    word-wrap: break-word;
+    font-size: 0.95em;
+    line-height: 1.65em;
+}
+
+.post-header {
+    margin-bottom: 1rem;
+}
+
+.post-title {
+    margin-bottom: 0;
+}
+
+.post-title a {
+    text-decoration: none;
+}
+
+.post-meta {
+    display: block;
+    margin: 3px 0 0 0;
+    color: #9eabb3;
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 1.3rem;
+    line-height: 2.2rem;
+}
+
+.post-meta a {
+    color: #9eabb3;
+    text-decoration: none;
+}
+
+.post-meta a:hover {
+    text-decoration: underline;
+}
+
+.post-meta .author {
+    margin: 0;
+    font-size: 1.3rem;
+    line-height: 1.3em;
+}
+
+.post-date {
+    display: inline-block;
+    text-transform: uppercase;
+    white-space: nowrap;
+    font-size: 1.2rem;
+    line-height: 1.2em;
+}
+
+.post-image {
+    margin: 0;
+    padding-top: 3rem;
+    padding-bottom: 30px;
+    border-top: 1px #E8E8E8 solid;
+}
+
+/* Keep images centered, and allow images wider than the main
+   text column to break out. */
+.post-content amp-img,
+.post-content amp-anim {
+    position: relative;
+    display: block;
+    padding: 0;
+    height: auto;
+    margin: 25px 0;
+}
+
+.footnotes {
+    font-size: 1.3rem;
+    line-height: 1.6em;
+    font-style: italic;
+}
+
+.footnotes li {
+    margin: 0.6rem 0;
+}
+
+.footnotes p {
+    margin: 0;
+}
+
+.footnotes p a:last-child {
+    text-decoration: none;
+}
+
+/* ==========================================================================
+   4. Footer - The bottom the AMP Post
+   ========================================================================== */
+
+.site-footer {
+    position: relative;
+    margin: 0 auto 20px auto;
+    padding: 1rem 15px;
+    max-width: 600px;
+    color: rgba(0,0,0,0.5);
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 1.1rem;
+    line-height: 1.75em;
+}
+
+.site-footer a {
+    color: rgba(0,0,0,0.5);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.site-footer a:hover {
+    border-bottom: #bbc7cc 1px solid;
+}
+
+.poweredby {
+    display: block;
+    float: right;
+    width: 45%;
+    text-align: right;
+}
+
+.copyright {
+    display: block;
+    float: left;
+    width: 45%;
+}
+
+#header-image {
+    margin-bottom: -1px;
+    margin-top: 2rem;
+}
+#sharing {
+    margin-top: 2rem;
+}
+#advert {
+  position: relative;
+  min-height: 185px;
+}
+amp-iframe {
+    margin: 0;
+}
+#post-image img {
+    object-fit: cover;
+}
+#post-image {
+  position: relative;
+  left: 50%;
+  display: block;
+  padding: 0;
+  min-width: 0;
+  max-width: 112%;
+  width: calc(100% + 32px);
+  height: auto;
+  transform: translateX(-50%);
+  -webkit-transform: translateX(-50%);
+  -ms-transform: translateX(-50%);
+}
+amp-img img {
+    object-position: left;
+    object-fit: contain;
+}
+
+.post-comments {
+    padding: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+    </style>
+
+</head>
+
+<body class="amp-template">
+    <header class="main-header">
+        <nav class="blog-title">
+          <a href="//www.devpy.me"><amp-img id="header-image" width="175px" height="55px" src="/content/images/2016/12/devpyc.png" alt="DevPy" /></a>
+        </nav>
+    </header>
+
+    <main class="content" role="main">
+        <article class="post" id="advert">
+          <amp-iframe 
+              layout="fill"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+              allowfullscreen
+              frameborder="0"
+              src="https://raw.sh/ads.html">
+              <amp-img layout="fill"
+              src="https://dummyimage.com/568x110/f1f1f1/f1f1f1.png&text=+"
+              placeholder></amp-img>
+          </amp-iframe>
+        </article>
+      
+        <article class="post">
+            <br />
+            <header class="post-header">
+                <h1 class="post-title">Building a Music Controlling Python Start Page for Linux</h1>
+                <section class="post-meta">
+                    <p class="author">by <a href="/author/robert/">Robert Washbourne</a></p>
+                    <time class="post-date" datetime="2017-02-21">2017-02-21</time>
+                </section>
+              
+                <p id="sharing" class="heading">
+                  <amp-social-share type="twitter"
+                      width="45"
+                      height="33"></amp-social-share>
+                  <amp-social-share type="facebook"
+                      width="45"
+                      height="33"
+                      data-param-app_id="688596344621673"></amp-social-share>
+                  <amp-social-share type="gplus"
+                      width="45"
+                      height="33"></amp-social-share>
+                  <amp-social-share type="email"
+                      width="45"
+                      height="33"></amp-social-share>
+                </p>
+            </header>
+
+            <amp-img id="post-image" src="" layout="responsive" width="1600" height="900"></amp-img>
+          
+            <br />
+            <section class="post-content">
+
+                <p>By using the Gnome GLib apis, we can use the Playerctl Linux package with Python. Bundling this with bottle, a simple Python server, and websockets to listen for updates, we have a music controlling homepage.</p>
+<h2 id="dependencies">Dependencies</h2>
+<p>You will of course need Python. Here, I use python2 because gevent (the websocket) does not support Python3.</p>
+<p>Linux packages you need:</p>
+<ul>
+<li><a href="https://github.com/acrisci/playerctl">Playerctl</a></li>
+</ul>
+<p>Python dependencies (install with pip):</p>
+<ul>
+<li>bottle</li>
+<li>bottle-websocket</li>
+</ul>
+<h2 id="github">Github</h2>
+<p>You can download all the code for this project <a href="https://github.com/devpytech/musicpage">on DevPy's github here</a>.</p>
+<p>You can clone this to your computer with</p>
+<pre><code class="language-bash">git clone https://github.com/devpytech/musicpage.git
+</code></pre>
+<h2 id="addingawebsocket">Adding a websocket</h2>
+<p>First we need to import the (extensive) list of packages.</p>
+<pre><code class="language-python">#!/usr/bin/env python2
+from bottle.ext.websocket import GeventWebSocketServer
+import gi
+gi.require_version('Playerctl', '1.0')
+from gi.repository import GLib, GObject, Playerctl
+from bottle.ext.websocket import websocket
+from geventwebsocket.exceptions import WebSocketError
+from bottle import run, get
+import threading
+import os
+from gevent import monkey
+monkey.patch_all()
+
+print("starting websocket")
+</code></pre>
+<h3 id="addingaroute">Adding a route</h3>
+<p>When the main page connects to the websocket, we send the attributes so we can update the display.</p>
+<pre><code class="language-python">@get('/websocket', apply=[websocket]) #provide a websocket connection
+def echo(ws):
+    print("connected")
+    # send the music status
+    ws.send('%s,%s,%s,%s' % (os.popen("playerctl metadata mpris:artUrl").read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property("status")))
+</code></pre>
+<h3 id="playerctlprocess">Playerctl process</h3>
+<p>We can make a new Playerctl player with <code>player = Playerctl.Player()</code> and run a loop to check for updates with <code>player.on('metadata', on_track_change)</code> and <code>GLib.MainLoop().run()</code>. When the track is updated, we send a message to the webpage.</p>
+<pre><code class="language-python">@get('/websocket', apply=[websocket])
+def echo(ws):
+    print("connected")
+    # send the music status
+    ws.send('%s,%s,%s,%s' % (os.popen("playerctl metadata mpris:artUrl").read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property("status")))
+    def on_track_change(player, e):
+        #this function will run when the music is updated (paused, skipped, etc.)
+        try: #see if the connection is still open
+            ws.send('%s,%s,%s,%s' % (os.popen("playerctl metadata mpris:artUrl").read(), Playerctl.Player().get_title(), Playerctl.Player().get_artist(), Playerctl.Player().get_property("status")))
+        except WebSocketError: #if it's not open, stop the process
+            player.stop()
+            loop.quit()
+            ws.close()
+
+    player = Playerctl.Player()
+    player.on('metadata', on_track_change) #listen for music updates
+
+    loop = GLib.MainLoop() 
+    loop.run() #run the playerctl updater
+    print("Disconnected from websocket")
+
+run(host='0.0.0.0', port=7000, server=GeventWebSocketServer) #run the server
+</code></pre>
+<h2 id="frontend">Frontend</h2>
+<p>In this section, we create the webpage that is shown (and updated in real time) for the user.</p>
+<h3 id="settings">Settings</h3>
+<p>Here we add color choosing and links that we use in html later.</p>
+<pre><code class="language-python">#!/usr/bin/env python2
+from bottle import route, run, request, get, post, static_file
+import gi
+gi.require_version('Playerctl', '1.0')
+from gi.repository import GLib, GObject, Playerctl
+from subprocess import Popen
+import sys
+import os
+
+Popen([sys.executable, './sendup.py']) #run the websocket script in the same folder (used to update info)
+
+############
+# SETTINGS
+############
+
+links = [['DevPy','http://DevPy.me'],['Reddit','http://Reddit.com'],['Google','http://Google.com']] #List of links to add to page
+
+theme = 'dark' #light or dark theme (sets colors)
+
+############
+# /SETTINGS
+############
+
+if theme == 'dark':
+    bgc = '#222'
+    fgc = 'rgba(255,255,255,0.6)'
+    bw = 'gray'
+else:
+    bgc = '#fff'
+    fgc = '#111'
+    bw = 'black'
+
+for x in range(len(links)):
+    #create list of links
+    links[x] = '&lt;a class="db link no-underline underline-hover '+bw+'" href="'+links[x][1]+'"&gt;'+links[x][0]+'&lt;/a&gt;'
+
+linkhtml = '''&lt;div class="db center" style="width: 182px;"&gt;&lt;div class="mt4 lh-copy"&gt;'''
+
+#add the links together
+for x in links:
+    linkhtml += x
+
+linkhtml += '''&lt;/div&gt;&lt;/div&gt;'''
+</code></pre>
+<h3 id="html">HTML</h3>
+<p>We generate the initial look of the app. The artist, song, and image are initialized as well.</p>
+<pre><code class="language-python">@get('/') # or @route('/login')
+def index():
+    player = Playerctl.Player() #grab a player
+    try: #Check if a music app is open (spotify, audacious, vlc,...)
+        title = player.get_title()
+        artist = player.get_artist()
+        img = os.popen("playerctl metadata mpris:artUrl").read()
+    except: #if nothing is open just show blank music
+        title = ''
+        artist = ''
+        img = ''
+
+    return '''
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Start Page&lt;/title&gt;
+&lt;link rel="stylesheet" href="/static/tachyons.css" /&gt;
+&lt;style&gt;
+/* Here we add the icons for play/pause/next/forward */
+@font-face {
+  font-family: 'Material Icons';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Material Icons'), local('MaterialIcons-Regular'), url(/static/mat.woff2) format('woff2');
+}
+.material-icons {
+  cursor: pointer;
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+.material-icons.md-light { color: rgba(0, 0, 0, 0.54); }
+.material-icons.md-dark { color: rgba(255, 255, 255, 1); }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body style="background-color:'''+bgc+'''"&gt;
+&lt;div style="position:relative; top: 35%%; transform: translateY(-50%%); "&gt;
+&lt;div class="mt4 db center black link" style="width: 178px;"&gt;
+  &lt;img id="img" style="width:180px;height:178px;background-color:#222;"class="db ba b--black-10" src="%s"&gt;
+  &lt;dl class="mt2 lh-copy"&gt;
+    &lt;dt class="clip"&gt;Title&lt;/dt&gt;
+    &lt;dd id="title" class="ml0 fw9" style="color:''' % (img)+fgc+'''"&gt;%s&lt;/dd&gt;
+    &lt;dt class="clip"&gt;Artist&lt;/dt&gt;
+    &lt;dd id="artist" class="ml0 gray"&gt;%s&lt;/dd&gt;
+  &lt;/dl&gt;
+  &lt;div style="text-align:center;color:''' % (title, artist)+fgc+'''"&gt;
+    &lt;a onclick="previous();" style="float:left;"&gt;&lt;i class="material-icons md-'''+theme+'''"&gt;skip_previous&lt;/i&gt;&lt;/a&gt;
+    &lt;a onclick="toggle();"&gt;&lt;i id ="stateicon" style="width:32px;" class="material-icons md-'''+theme+'''"&gt;pause_arrow&lt;/i&gt;&lt;/a&gt;
+    &lt;a onclick="next();" style="float:right;"&gt;&lt;i class="material-icons md-'''+theme+'''"&gt;skip_next&lt;/i&gt;&lt;/a&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+''' + linkhtml + # add the scripts below here
+</code></pre>
+<h3 id="scripts">Scripts</h3>
+<p>Here we add some jquery scripts to talk to the server.</p>
+<pre><code class="language-python"># attach this to the previous html code
+'''
+&lt;/div&gt;
+&lt;script src="/static/jquery-3.1.1.min.js"&gt;&lt;/script&gt;
+&lt;script type="text/javascript"&gt;
+var ws;
+ws = new WebSocket("ws://0.0.0.0:7000/websocket");
+ws.onopen = function (evt) {
+  ws.send("Connected");
+};
+ws.onclose = function (evt) {
+  ws.send("Closed");
+};
+
+//in this function we listen for updates from the server and write them to the page.
+ws.onmessage = function (evt) {
+    var array = evt.data.split(',');
+    if (array.length == 4) {
+        console.log(array);
+        $("#img").attr("src", array[0]);
+        $("#title").text(array[1]);
+        $("#artist").text(array[2]);
+        if (array[3] === 'Playing') {
+            $('#stateicon').text('pause');
+        } else {
+            $('#stateicon').text('play_arrow');
+        }
+        ws.send("Updated");
+    } else {
+        ws.send("OK.")
+    }
+};
+&lt;/script&gt;
+&lt;script&gt;
+// when the buttons are pressed, post the server
+function next() {
+    $.post('/next')
+    return false;
+}
+function previous() {
+    $.post('/previous')
+    return false;
+}
+function toggle() {
+    $.post('/toggle');
+    return false;
+}
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+'''
+</code></pre>
+<h3 id="postreplies">Post replies</h3>
+<p>Control the music when the client POSTs the server.</p>
+<pre><code class="language-python">@post('/next')
+def next_song():
+    Playerctl.Player().next()
+
+@post('/previous')
+def next_song():
+    Playerctl.Player().previous()
+
+@post('/toggle')
+def next_song():
+    Playerctl.Player().play_pause()
+
+@post('/status')
+def is_playing():
+    return Playerctl.Player().get_property("status")
+
+@route('/static/&lt;filename:path&gt;') #This is for static files
+def send_static(filename):
+    return static_file(filename, root=os.path.dirname(os.path.realpath(' ')))
+
+run(host='0.0.0.0', port=8080) #run the server
+</code></pre>
+<h2 id="finishingup">Finishing up</h2>
+<p>Now you should have a nice music controlling start page. You can make this show as the new tab on Chrome with <a href="https://chrome.google.com/webstore/detail/new-tab-redirect/icpgjfneehieebagbmdbhnlpiopdcmna">this extension</a>, and on Firefox with <a href="https://addons.mozilla.org/en-US/firefox/addon/new-tab-override/">this one</a>. Just set the url to <code>0.0.0.0:8080</code>.</p>
+<p></p>
+<p>Here I use my method to <a href="http://www.devpy.me/how-to-add-a-music-visualizer-to-your-linux-desktop/">show a music visualizer</a> on the desktop, plus <a href="http://www.devpy.me/your-guide-to-a-comfortable-linux-desktop-with-openbox/">my openbox setup</a>.</p>
+<p><a href="https://youtu.be/LY481F1r6G8">Youtube video</a></p>
+
+
+            </section>
+
+            <section class="post-comments">
+            <a href="/10-of-the-best-linux-icon-themes-compared/#isso-thread">View Comments</a>
+            </section>
+    
+
+        </article>
+
+    </main>
+  
+    <amp-analytics type="googleanalytics" id="analytics1">
+    <script type="application/json">
+    {
+      "vars": {
+        "account": "UA-77238872-2"
+      },
+      "triggers": {
+        "trackPageview": {
+          "on": "visible",
+          "request": "pageview"
+        }
+      }
+    }
+    </script>
+    </amp-analytics>
+  
+</body>
+</html>
